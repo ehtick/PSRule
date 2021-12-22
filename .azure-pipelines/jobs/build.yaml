@@ -1,0 +1,74 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+#
+# Build job
+#
+parameters:
+- name: vmImage
+  type: string
+  default: 'ubuntu-20.04'
+- name: buildConfiguration
+  type: string
+  default: 'Release'
+- name: artifact
+  type: string
+- name: artifactPath
+  type: string
+
+stages:
+
+# Build pipeline
+- stage: Build
+  displayName: Build
+  dependsOn: []
+  jobs:
+  - job:
+    pool:
+      vmImage: ${{ parameters.vmImage }}
+    displayName: 'Module'
+    steps:
+
+    # Install pipeline dependencies
+    - powershell: ./.azure-pipelines/pipeline-deps.ps1
+      displayName: 'Install dependencies'
+
+    # Build module
+    - powershell: Invoke-Build -Configuration ${{ parameters.buildConfiguration }} -Build $(Build.BuildNumber)
+      displayName: 'Build module'
+
+    # DotNet test results
+    - task: PublishTestResults@2
+      displayName: 'Publish unit test results'
+      inputs:
+        testRunTitle: 'DotNet on ${{ parameters.vmImage }}'
+        testRunner: VSTest
+        testResultsFiles: 'reports/*.trx'
+        mergeTestResults: true
+        platform: ${{ parameters.vmImage }}
+        configuration: ${{ parameters.buildConfiguration }}
+        publishRunAttachments: true
+      condition: succeededOrFailed()
+
+    # PSRule results
+    - task: PublishTestResults@2
+      displayName: 'Publish PSRule results'
+      inputs:
+        testRunTitle: 'PSRule on ${{ parameters.vmImage }}'
+        testRunner: NUnit
+        testResultsFiles: 'reports/ps-rule*.xml'
+        mergeTestResults: true
+        platform: ${{ parameters.vmImage }}
+        configuration: ${{ parameters.buildConfiguration }}
+        publishRunAttachments: true
+      condition: succeededOrFailed()
+
+    - publish: reports/
+      displayName: 'Test output'
+      artifact: Tests
+      condition: succeededOrFailed()
+
+    # Generate artifacts
+    - publish: ${{ parameters.artifactPath }}
+      displayName: 'Publish module'
+      artifact: ${{ parameters.artifact }}

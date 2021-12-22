@@ -1,0 +1,40 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+#
+# Code signing job
+#
+parameters:
+- name: vmImage
+  type: string
+  default: 'ubuntu-20.04'
+- name: official
+  type: boolean
+  default: false
+- name: artifact
+  type: string
+  default: '$(build.artifact)'
+
+jobs:
+- job: CodeSigning
+  displayName: Code Signing
+  pool:
+    vmImage: ${{ parameters.vmImage }}
+  steps:
+  - checkout: self
+
+  # Download module from build
+  - task: DownloadPipelineArtifact@2
+    displayName: 'Download module'
+    inputs:
+      artifact: '${{ parameters.artifact }}'
+      path: '$(Build.SourcesDirectory)/out/unsigned/${{ parameters.artifact }}'
+
+  - ${{ if eq(parameters.official, 'true') }}:
+    - task: onebranch.pipeline.signing@1
+      displayName: 'Sign ${{ parameters.artifact }}'
+      inputs:
+        command: 'sign'
+        signing_profile: 'external_distribution'
+        files_to_sign: '**/*.exe;**/*.dll;**/*.ps1'
+        search_root: '$(Build.SourcesDirectory)/out/unsigned/${{ parameters.artifact }}/'
