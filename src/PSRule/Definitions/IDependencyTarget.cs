@@ -1,24 +1,39 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace PSRule.Definitions
+namespace PSRule.Definitions;
+
+#nullable enable
+
+/// <summary>
+/// An object that relies on a dependency chain.
+/// </summary>
+public interface IDependencyTarget
 {
-    public interface IDependencyTarget
-    {
-        ResourceId Id { get; }
+    /// <summary>
+    /// The unique identifier of the resource.
+    /// </summary>
+    ResourceId Id { get; }
 
-        ResourceId? Ref { get; }
+    /// <summary>
+    /// A unique reference for the resource.
+    /// </summary>
+    ResourceId? Ref { get; }
 
-        ResourceId[] Alias { get; }
+    /// <summary>
+    /// Additional aliases for the resource.
+    /// </summary>
+    ResourceId[]? Alias { get; }
 
-        /// <summary>
-        /// Resources this target depends on.
-        /// </summary>
-        ResourceId[] DependsOn { get; }
+    /// <summary>
+    /// Resources this target depends on.
+    /// </summary>
+    ResourceId[]? DependsOn { get; }
 
-        /// <summary>
-        /// Determines if the source was imported as a dependency.
-        /// </summary>
-        bool Dependency { get; }
-    }
+    /// <summary>
+    /// Determines if the source was imported as a dependency.
+    /// </summary>
+    bool Dependency { get; }
 }
+
+#nullable restore

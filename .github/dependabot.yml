@@ -7,37 +7,72 @@
 
 version: 2
 updates:
+  # Maintain dependencies for NuGet
+  - package-ecosystem: nuget
+    directory: '/'
+    schedule:
+      interval: daily
+    labels:
+      - dependencies
+    reviewers:
+      - microsoft/psrule
+    groups:
+      # Group PowerShell packages that have inter-dependencies
+      dev-powershell:
+        patterns:
+          - System.Management.Automation
+          - Microsoft.PowerShell.SDK
+    ignore:
+      - dependency-name: gitversion.tool
 
-# Maintain dependencies for NuGet
-- package-ecosystem: 'nuget' # See documentation for possible values
-  directory: '/' # Location of package manifests
-  schedule:
-    interval: 'daily'
-  labels:
-  - 'dependencies'
-  reviewers:
-  - 'microsoft/psrule'
-  ignore:
-  # Ignore upgrades to PS 7.1 for tool chain components at this time
-  # Testing against PS 7.1 is already completed
-  - dependency-name: 'Microsoft.PowerShell.SDK'
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: daily
+    labels:
+      - ci-quality
+    reviewers:
+      - microsoft/psrule
 
-# Maintain dependencies for GitHub Actions
-- package-ecosystem: 'github-actions'
-  directory: '/'
-  schedule:
-    interval: 'daily'
-  labels:
-  - 'ci-quality'
-  reviewers:
-  - 'microsoft/psrule'
+  # Maintain dependencies for Python
+  - package-ecosystem: pip
+    directory: '/'
+    schedule:
+      interval: daily
+    labels:
+      - ci-quality
+    reviewers:
+      - microsoft/psrule
 
-# Maintain dependencies for Python
-- package-ecosystem: 'pip'
-  directory: '/'
-  schedule:
-    interval: 'daily'
-  labels:
-  - 'ci-quality'
-  reviewers:
-  - 'azure/psrule-rules-azure'
+  # Maintain dependencies for npm.
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: daily
+    labels:
+      - 'dependencies'
+    reviewers:
+      - 'microsoft/psrule'
+    groups:
+      # Group linting dependencies
+      dev-linting:
+        patterns:
+          - esbuild
+          - eslint
+          - '@typescript-eslint/*'
+      dev-types:
+        patterns:
+          - '@types/*'
+        exclude-patterns:
+          - '@types/vscode'
+
+  # Maintain dependencies for Dev Containers
+  - package-ecosystem: devcontainers
+    directory: '/'
+    schedule:
+      interval: weekly
+    labels:
+      - ci-quality
+    reviewers:
+      - microsoft/psrule

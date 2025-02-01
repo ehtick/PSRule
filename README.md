@@ -5,7 +5,28 @@ PSRule works great and integrates with popular continuous integration (CI) syste
 
 [![Open in vscode.dev](https://img.shields.io/badge/Open%20in-vscode.dev-blue)][1]
 
-Features of PSRule include:
+### Summary
+
+- [Introduction](#summary)
+- [Project Objectives](#project-objectives)
+- [Support](#support)
+- [Getting the module](#getting-the-module)
+- [Getting extensions](#getting-extensions)
+- [Getting started](#getting-started)
+  - [Scenarios](#scenarios)
+- [Language reference](#language-reference)
+  - [Keywords](#keywords)
+  - [Commands](#commands)
+  - [Concepts](#concepts)
+  - [Schemas](#schemas)
+- [Related projects](#related-projects)
+- [Changes and versioning](#changes-and-versioning)
+- [Contributing](#contributing)
+- [Code of conduct](#code-of-conduct)
+- [Maintainers](#maintainers)
+- [License](#license)
+
+### Features of PSRule include
 
 - [DevOps][2] - Built to support DevOps culture and tools.
 - [Extensible][3] - Define tests using YAML, JSON, or PowerShell format.
@@ -38,6 +59,8 @@ Rules must be able to be disabled where they are not applicable.
 Continue reading the [PSRule design specification][5].
 
   [5]: docs/specs/design-spec.md
+  
+> Back to the [summary](#summary)
 
 ## Support
 
@@ -52,15 +75,23 @@ Support for this project/ product is limited to the resources listed above.
   [6]: https://github.com/Microsoft/PSRule/issues
   [7]: https://github.com/microsoft/PSRule/discussions
 
+> Back to the [summary](#summary)
+
 ## Getting the module
 
 You can download and install the PSRule module from the PowerShell Gallery.
 
 Module | Description | Downloads / instructions
 ------ | ----------- | ------------------------
-PSRule | Validate infrastructure as code (IaC) and objects using PowerShell rules. | [latest][module-psrule] / [instructions][install]
+PSRule | Validate infrastructure as code (IaC) and objects using PowerShell rules. | [latest][8] / [instructions][9]
 
-For rule and integration modules see [related projects](#related-projects).
+For rule and integration modules see [related projects][10].
+
+  [8]: https://www.powershellgallery.com/packages/PSRule
+  [9]: https://microsoft.github.io/PSRule/v2/install-instructions/
+  [10]: https://microsoft.github.io/PSRule/v2/related-projects/
+
+> Back to the [summary](#summary)
 
 ## Getting extensions
 
@@ -68,9 +99,15 @@ Companion extensions are available for the following platforms.
 
 Platform           | Description | Downloads / instructions
 --------           | ----------- | ------------------------
-Azure Pipelines    | Validate infrastructure as code (IaC) and DevOps repositories using Azure Pipelines. | [latest][extension-pipelines] / [instructions][install]
-GitHub Actions     | Validate infrastructure as code (IaC) and DevOps repositories using GitHub Actions. | [latest][extension-actions] / [instructions][install]
-Visual Studio Code | Visual Studio Code extension for PSRule. | [latest][extension-vscode] / [instructions][install]
+Azure Pipelines    | Validate infrastructure as code (IaC) and DevOps repositories using Azure Pipelines. | [latest][11] / [instructions][9]
+GitHub Actions     | Validate infrastructure as code (IaC) and DevOps repositories using GitHub Actions. | [latest][12] / [instructions][9]
+Visual Studio Code | Visual Studio Code extension for PSRule. | [latest][13] / [instructions][9]
+
+  [11]: https://marketplace.visualstudio.com/items?itemName=bewhite.ps-rule
+  [12]: https://github.com/marketplace/actions/psrule
+  [13]: https://marketplace.visualstudio.com/items?itemName=bewhite.psrule-vscode
+  
+> Back to the [summary](#summary)
 
 ## Getting started
 
@@ -78,6 +115,8 @@ For an quickstart example of using PSRule see [Create a standalone rule](https:/
 For specific use cases see [scenarios](#scenarios).
 
 For frequently asked questions, see the [FAQ](https://microsoft.github.io/PSRule/v2/faq/).
+
+> Back to the [summary](#summary)
 
 ### Scenarios
 
@@ -89,6 +128,8 @@ For walk through examples of PSRule usage see:
 - [Using within continuous integration](https://microsoft.github.io/PSRule/v2/scenarios/validation-pipeline/validation-pipeline/)
 - [Packaging rules in a module](https://microsoft.github.io/PSRule/v2/authoring/packaging-rules/)
 - [Writing rule help](https://microsoft.github.io/PSRule/v2/authoring/writing-rule-help/)
+
+> Back to the [summary](#summary)
 
 ## Language reference
 
@@ -108,6 +149,8 @@ The following language keywords are used by the `PSRule` module:
 - [Reason](https://microsoft.github.io/PSRule/v2/keywords/PSRule/en-US/about_PSRule_Keywords/#reason) - Return a reason for why the rule failed.
 - [Recommend](https://microsoft.github.io/PSRule/v2/keywords/PSRule/en-US/about_PSRule_Keywords/#recommend) - Return a recommendation to resolve the issue and pass the rule.
 
+> Back to the [summary](#summary)
+
 ### Commands
 
 The following commands exist in the `PSRule` module:
@@ -123,11 +166,14 @@ The following commands exist in the `PSRule` module:
 - [Set-PSRuleOption](https://microsoft.github.io/PSRule/v2/commands/PSRule/en-US/Set-PSRuleOption/) - Sets options that configure PSRule execution.
 - [Test-PSRuleTarget](https://microsoft.github.io/PSRule/v2/commands/PSRule/en-US/Test-PSRuleTarget/) - Pass or fail objects against matching rules.
 
+> Back to the [summary](#summary)
+
 ### Concepts
 
 The following conceptual topics exist in the `PSRule` module:
 
 - [Assert](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Assert/)
+  - [APIVersion](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Assert/#apiversion)
   - [Contains](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Assert/#contains)
   - [Count](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Assert/#count)
   - [EndsWith](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Assert/#endswith)
@@ -190,6 +236,7 @@ The following conceptual topics exist in the `PSRule` module:
 - [Expressions](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/)
   - [AllOf](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#allof)
   - [AnyOf](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#anyof)
+  - [APIVersion](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#apiversion)
   - [Contains](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#contains)
   - [Count](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#count)
   - [EndsWith](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#endswith)
@@ -225,6 +272,7 @@ The following conceptual topics exist in the `PSRule` module:
   - [NotMatch](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#notmatch)
   - [NotStartsWith](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#notstartswith)
   - [NotWithinPath](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#notwithinpath)
+  - [Scope](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#scope)
   - [SetOf](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#setof)
   - [Source](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#source)
   - [StartsWith](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#startswith)
@@ -232,52 +280,70 @@ The following conceptual topics exist in the `PSRule` module:
   - [Type](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#type)
   - [WithinPath](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#withinpath)
   - [Version](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/#version)
-- [Options](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/)
-  - [Binding.Field](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#bindingfield)
-  - [Binding.IgnoreCase](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#bindingignorecase)
-  - [Binding.NameSeparator](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#bindingnameseparator)
-  - [Binding.PreferTargetInfo](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#bindingprefertargetinfo)
-  - [Binding.TargetName](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#bindingtargetname)
-  - [Binding.TargetType](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#bindingtargettype)
-  - [Binding.UseQualifiedName](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#bindingusequalifiedname)
-  - [Configuration](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#configuration)
-  - [Convention.Include](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#conventioninclude)
-  - [Execution.AliasReferenceWarning](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#executionaliasreferencewarning)
-  - [Execution.LanguageMode](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#executionlanguagemode)
-  - [Execution.InconclusiveWarning](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#executioninconclusivewarning)
-  - [Execution.NotProcessedWarning](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#executionnotprocessedwarning)
-  - [Execution.SuppressedRuleWarning](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#executionsuppressedrulewarning)
-  - [Execution.InvariantCultureWarning](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#executioninvariantculturewarning)
-  - [Include.Module](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#includemodule)
-  - [Include.Path](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#includepath)
-  - [Input.Format](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#inputformat)
-  - [Input.IgnoreGitPath](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#inputignoregitpath)
-  - [Input.IgnoreRepositoryCommon](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#inputignorerepositorycommon)
-  - [Input.ObjectPath](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#inputobjectpath)
-  - [Input.PathIgnore](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#inputpathignore)
-  - [Input.TargetType](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#inputtargettype)
-  - [Logging.LimitDebug](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#logginglimitdebug)
-  - [Logging.LimitVerbose](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#logginglimitverbose)
-  - [Logging.RuleFail](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#loggingrulefail)
-  - [Logging.RulePass](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#loggingrulepass)
-  - [Output.As](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputas)
-  - [Output.Banner](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputbanner)
-  - [Output.Culture](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputculture)
-  - [Output.Encoding](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputencoding)
-  - [Output.Footer](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputfooter)
-  - [Output.Format](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputformat)
-  - [Output.JsonIndent](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputjsonindent)
-  - [Output.Outcome](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputoutcome)
-  - [Output.Path](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputpath)
-  - [Output.SarifProblemsOnly](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputsarifproblemsonly)
-  - [Output.Style](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#outputstyle)
-  - [Requires](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#requires)
-  - [Rule.Baseline](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#rulebaseline)
-  - [Rule.Include](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#ruleinclude)
-  - [Rule.IncludeLocal](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#ruleincludelocal)
-  - [Rule.Exclude](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#ruleexclude)
-  - [Rule.Tag](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#ruletag)
-  - [Suppression](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Options/#suppression)
+- [Options](https://aka.ms/ps-rule/options)
+  - [Baseline.Group](https://aka.ms/ps-rule/options#baselinegroup)
+  - [Binding.Field](https://aka.ms/ps-rule/options#bindingfield)
+  - [Binding.IgnoreCase](https://aka.ms/ps-rule/options#bindingignorecase)
+  - [Binding.NameSeparator](https://aka.ms/ps-rule/options#bindingnameseparator)
+  - [Binding.PreferTargetInfo](https://aka.ms/ps-rule/options#bindingprefertargetinfo)
+  - [Binding.TargetName](https://aka.ms/ps-rule/options#bindingtargetname)
+  - [Binding.TargetType](https://aka.ms/ps-rule/options#bindingtargettype)
+  - [Binding.UseQualifiedName](https://aka.ms/ps-rule/options#bindingusequalifiedname)
+  - [Capabilities](https://aka.ms/ps-rule/options#capabilities)
+  - [Configuration](https://aka.ms/ps-rule/options#configuration)
+  - [Convention.Include](https://aka.ms/ps-rule/options#conventioninclude)
+  - [Execution.AliasReference](https://aka.ms/ps-rule/options#executionaliasreference)
+  - [Execution.Break](https://aka.ms/ps-rule/options#executionbreak)
+  - [Execution.DuplicateResourceId](https://aka.ms/ps-rule/options#executionduplicateresourceid)
+  - [Execution.HashAlgorithm](https://aka.ms/ps-rule/options#executionhashalgorithm)
+  - [Execution.LanguageMode](https://aka.ms/ps-rule/options#executionlanguagemode)
+  - [Execution.InvariantCulture](https://aka.ms/ps-rule/options#executioninvariantculture)
+  - [Execution.InitialSessionState](https://aka.ms/ps-rule/options#executioninitialsessionstate)
+  - [Execution.RestrictScriptSource](https://aka.ms/ps-rule/options#executionrestrictscriptsource)
+  - [Execution.RuleInconclusive](https://aka.ms/ps-rule/options#executionruleinconclusive)
+  - [Execution.SuppressionGroupExpired](https://aka.ms/ps-rule/options#executionsuppressiongroupexpired)
+  - [Execution.UnprocessedObject](https://aka.ms/ps-rule/options#executionunprocessedobject)
+  - [Format](https://aka.ms/ps-rule/options#format)
+  - [Include.Module](https://aka.ms/ps-rule/options#includemodule)
+  - [Include.Path](https://aka.ms/ps-rule/options#includepath)
+  - [Input.FileObjects](https://aka.ms/ps-rule/options#inputfileobjects)
+  - [Input.Format](https://aka.ms/ps-rule/options#inputformat)
+  - [Input.IgnoreGitPath](https://aka.ms/ps-rule/options#inputignoregitpath)
+  - [Input.IgnoreObjectSource](https://aka.ms/ps-rule/options#inputignoreobjectsource)
+  - [Input.IgnoreRepositoryCommon](https://aka.ms/ps-rule/options#inputignorerepositorycommon)
+  - [Input.IgnoreUnchangedPath](https://aka.ms/ps-rule/options#inputignoreunchangedpath)
+  - [Input.ObjectPath](https://aka.ms/ps-rule/options#inputobjectpath)
+  - [Input.PathIgnore](https://aka.ms/ps-rule/options#inputpathignore)
+  - [Input.TargetType](https://aka.ms/ps-rule/options#inputtargettype)
+  - [Logging.LimitDebug](https://aka.ms/ps-rule/options#logginglimitdebug)
+  - [Logging.LimitVerbose](https://aka.ms/ps-rule/options#logginglimitverbose)
+  - [Logging.RuleFail](https://aka.ms/ps-rule/options#loggingrulefail)
+  - [Logging.RulePass](https://aka.ms/ps-rule/options#loggingrulepass)
+  - [Output.As](https://aka.ms/ps-rule/options#outputas)
+  - [Output.Banner](https://aka.ms/ps-rule/options#outputbanner)
+  - [Output.Culture](https://aka.ms/ps-rule/options#outputculture)
+  - [Output.Encoding](https://aka.ms/ps-rule/options#outputencoding)
+  - [Output.Footer](https://aka.ms/ps-rule/options#outputfooter)
+  - [Output.Format](https://aka.ms/ps-rule/options#outputformat)
+  - [Output.JobSummaryPath](https://aka.ms/ps-rule/options#outputjobsummarypath)
+  - [Output.JsonIndent](https://aka.ms/ps-rule/options#outputjsonindent)
+  - [Output.Outcome](https://aka.ms/ps-rule/options#outputoutcome)
+  - [Output.Path](https://aka.ms/ps-rule/options#outputpath)
+  - [Output.SarifProblemsOnly](https://aka.ms/ps-rule/options#outputsarifproblemsonly)
+  - [Output.Style](https://aka.ms/ps-rule/options#outputstyle)
+  - [Override.Level](https://aka.ms/ps-rule/options#overridelevel)
+  - [Repository.BaseRef](https://aka.ms/ps-rule/options#repositorybaseref)
+  - [Repository.Url](https://aka.ms/ps-rule/options#repositoryurl)
+  - [Requires](https://aka.ms/ps-rule/options#requires)
+  - [Rule.Baseline](https://aka.ms/ps-rule/options#rulebaseline)
+  - [Rule.Include](https://aka.ms/ps-rule/options#ruleinclude)
+  - [Rule.IncludeLocal](https://aka.ms/ps-rule/options#ruleincludelocal)
+  - [Rule.Exclude](https://aka.ms/ps-rule/options#ruleexclude)
+  - [Rule.Tag](https://aka.ms/ps-rule/options#ruletag)
+  - [Run.Category](https://aka.ms/ps-rule/options##runcategory)
+  - [Run.Description](https://aka.ms/ps-rule/options##rundescription)
+  - [Run.Instance](https://aka.ms/ps-rule/options##runinstance)
+  - [Suppression](https://aka.ms/ps-rule/options#suppression)
 - [Rules](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Rules/)
 - [Selectors](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Selectors/)
 - [Suppression Groups](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_SuppressionGroups/)
@@ -289,6 +355,8 @@ The following conceptual topics exist in the `PSRule` module:
   - [$Rule](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Variables/#rule)
   - [$TargetObject](https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Variables/#targetobject)
 
+> Back to the [summary](#summary)
+
 ### Schemas
 
 PSRule uses the following schemas:
@@ -297,18 +365,16 @@ PSRule uses the following schemas:
 - [Language](schemas/PSRule-language.schema.json) - Schema for PSRule resources such as baselines.
 - [Resources](schemas/PSRule-resources.schema.json) - Schema for PSRule resources documents used with JSON.
 
+> Back to the [summary](#summary)
+
 ## Related projects
 
-For a list of projects and integrations see [Related projects](https://microsoft.github.io/PSRule/v2/related-projects/).
+For a list of projects and integrations see [Related projects][10].
 
 ## Changes and versioning
 
-Modules in this repository use [semantic versioning](https://semver.org/) to declare breaking changes.
-For a list of module changes please see the [change log](CHANGELOG.md).
-
-> Pre-release module versions are created on major commits and can be installed from the PowerShell Gallery.
-> Pre-release versions should be considered experimental.
-> Modules and change log details for pre-releases will be removed as stable releases are made available.
+This repository uses [semantic versioning](http://semver.org/) to declare breaking changes.
+For details please see the [changes and versioning](https://microsoft.github.io/PSRule/v3/versioning/).
 
 ## Contributing
 
@@ -324,14 +390,16 @@ or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any addi
 ## Maintainers
 
 - [Bernie White](https://github.com/BernieWhite)
-- [Armaan Mcleod](https://github.com/ArmaanMcleod)
 
 ## License
 
 This project is [licensed under the MIT License](LICENSE).
 
-[install]: https://microsoft.github.io/PSRule/v2/install-instructions/
-[module-psrule]: https://www.powershellgallery.com/packages/PSRule
-[extension-vscode]: https://marketplace.visualstudio.com/items?itemName=bewhite.psrule-vscode
-[extension-pipelines]: https://marketplace.visualstudio.com/items?itemName=bewhite.ps-rule
-[extension-actions]: https://github.com/marketplace/actions/psrule
+## Trademarks
+
+This project may contain trademarks or logos for projects, products, or services.
+Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/legal/intellectualproperty/trademarks).
+Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
+Any use of third-party trademarks or logos are subject to those third-party's policies.
+
+> Back to the [summary](#summary)

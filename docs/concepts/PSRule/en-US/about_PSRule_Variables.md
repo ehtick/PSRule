@@ -170,12 +170,15 @@ The following properties are available for read access:
   This property can only be called within the `-End` block of a convention.
 - `Field` - A hashtable of custom bound fields.
   See option `Binding.Field` for more information.
+- `Input` - Allows adding additional input paths to the pipeline.
+- `Repository` - Provides access to information about the current repository.
+- `Scope` - Any scopes assigned to the object currently being processed by the pipeline.
+- `Source` - A collection of sources for the object currently being processed on the pipeline.
 - `TargetObject` - The object currently being processed on the pipeline.
 - `TargetName` - The name of the object currently being processed on the pipeline.
   This property will automatically default to `TargetName` or `Name` properties of the object if they exist.
 - `TargetType` - The type of the object currently being processed on the pipeline.
   This property will automatically bind to `PSObject.TypeNames[0]` by default.
-- `Source` - A collection of sources for the object currently being processed on the pipeline.
 - `Output` - The output of all rules.
   This property can only be called within the `-End` block of a convention.
 
@@ -201,16 +204,21 @@ The following helper methods are available:
   If more than one object is contained in the file, only the first object is returned.
   When the source file contains no objects null is returned.
 - `Import(PSObject[] sourceObject)` - Imports one or more source objects into the pipeline.
-  This method can only be called within the `-Begin` block of a convention.
+  This method can only be called within the `-Initialize` or `-Begin` block of a convention.
   Use this method to expand an object into child objects that will be processed independently.
   Objects imported using this method will be excluded from the `Input.ObjectPath` option if set.
+- `ImportWithType(string type, PSObject[] sourceObject)` - Imports one or more source objects into the pipeline.
+  This method can only be called within the `-Initialize` or `-Begin` block of a convention.
+  Use this method to expand an object into child objects that will be processed independently.
+  Objects imported using this method will be excluded from the `Input.ObjectPath` option if set.
+  When `Binding.PreferTargetInfo` is true, the type will be automatically used as the `TargetType` for the imported object.
 - `AddService(string id, object service)` - Add a service to the current context.
   The service can be retrieved using `$PSRule.GetService(id)`.
   The service object will be available to all rules and cleaned up after all rules are executed.
   Services should implement the `IDisposable` interface to perform additional cleanup.
   This method can only be called within the `-Initialize` block of a convention.
 - `GetService(string id)` - Retrieves a service previously added by a convention.
-- `GetPath(object sourceObject, string path)` - Evalute an object path expression and returns the resulting objects.
+- `GetPath(object sourceObject, string path)` - Evaluate an object path expression and returns the resulting objects.
 
 The file format is detected based on the same file formats as the option `Input.Format`.
 i.e. Yaml, Json, Markdown, and PowerShell Data.

@@ -70,6 +70,15 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The number of items is &apos;{0}&apos; instead of &apos;{1}&apos;..
+        /// </summary>
+        internal static string Assert_Count {
+            get {
+                return ResourceManager.GetString("Assert_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value &apos;{0}&apos; does not match the expression &apos;{1}&apos;..
         /// </summary>
         internal static string Assert_DoesNotMatch {
@@ -88,11 +97,29 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Does not exist..
+        /// </summary>
+        internal static string Assert_Exists {
+            get {
+                return ResourceManager.GetString("Assert_Exists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value &apos;{0}&apos; does not contain only lowercase characters..
         /// </summary>
         internal static string Assert_IsLower {
             get {
                 return ResourceManager.GetString("Assert_IsLower", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value is null..
+        /// </summary>
+        internal static string Assert_IsNull {
+            get {
+                return ResourceManager.GetString("Assert_IsNull", resourceCulture);
             }
         }
         
@@ -178,6 +205,15 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The number of items is &apos;{0}&apos;..
+        /// </summary>
+        internal static string Assert_NotCount {
+            get {
+                return ResourceManager.GetString("Assert_NotCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value &apos;{0}&apos; is not a date..
         /// </summary>
         internal static string Assert_NotDateTime {
@@ -192,6 +228,15 @@ namespace PSRule.Resources {
         internal static string Assert_NotEndsWith {
             get {
                 return ResourceManager.GetString("Assert_NotEndsWith", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exists..
+        /// </summary>
+        internal static string Assert_NotExists {
+            get {
+                return ResourceManager.GetString("Assert_NotExists", resourceCulture);
             }
         }
         
@@ -666,9 +711,9 @@ namespace PSRule.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The version &apos;{0}&apos; does not match the constraint &apos;{1}&apos;..
         /// </summary>
-        internal static string VersionContraint {
+        internal static string VersionConstraint {
             get {
-                return ResourceManager.GetString("VersionContraint", resourceCulture);
+                return ResourceManager.GetString("VersionConstraint", resourceCulture);
             }
         }
         

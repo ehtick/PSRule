@@ -79,6 +79,60 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The arguments for &apos;{0}&apos; are not in the expected format or type..
+        /// </summary>
+        internal static string ArgumentFormatInvalid {
+            get {
+                return ResourceManager.GetString("ArgumentFormatInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The argument &apos;{0}&apos; for &apos;{1}&apos; is not a valid boolean..
+        /// </summary>
+        internal static string ArgumentInvalidBoolean {
+            get {
+                return ResourceManager.GetString("ArgumentInvalidBoolean", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The argument &apos;{0}&apos; for &apos;{1}&apos; is not a valid integer..
+        /// </summary>
+        internal static string ArgumentInvalidInteger {
+            get {
+                return ResourceManager.GetString("ArgumentInvalidInteger", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The argument &apos;{0}&apos; for &apos;{1}&apos; is not a valid string..
+        /// </summary>
+        internal static string ArgumentInvalidString {
+            get {
+                return ResourceManager.GetString("ArgumentInvalidString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of arguments &apos;{1}&apos; is not within the allowed range for &apos;{0}&apos;..
+        /// </summary>
+        internal static string ArgumentsOutOfRange {
+            get {
+                return ResourceManager.GetString("ArgumentsOutOfRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The baseline &apos;{0}&apos; is obsolete. Consider switching to an alternative baseline..
+        /// </summary>
+        internal static string BaselineObsolete {
+            get {
+                return ResourceManager.GetString("BaselineObsolete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Binding functions are not supported in this language mode..
         /// </summary>
         internal static string ConstrainedTargetBinding {
@@ -115,6 +169,15 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Target failed sub-selector pre-condition..
+        /// </summary>
+        internal static string DebugTargetSubselectorMismatch {
+            get {
+                return ResourceManager.GetString("DebugTargetSubselectorMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Target failed Type precondition.
         /// </summary>
         internal static string DebugTargetTypeMismatch {
@@ -142,11 +205,20 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A rule with the same id &apos;{0}&apos; already exists..
+        ///   Looks up a localized string similar to The option &apos;{0}&apos; is deprecated and will be removed with PSRule v3. See http://aka.ms/ps-rule/deprecations for more detail..
         /// </summary>
-        internal static string DuplicateRuleId {
+        internal static string DeprecatedOption {
             get {
-                return ResourceManager.GetString("DuplicateRuleId", resourceCulture);
+                return ResourceManager.GetString("DeprecatedOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The resource &apos;{0}&apos; is using a duplicate resource identifier. A resource with the identifier &apos;{1}&apos; already exists. Each resource must have a unique name, ref, and aliases. See https://aka.ms/ps-rule/naming for guidance on naming within PSRule..
+        /// </summary>
+        internal static string DuplicateResourceId {
+            get {
+                return ResourceManager.GetString("DuplicateResourceId", resourceCulture);
             }
         }
         
@@ -187,6 +259,15 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to parse expression. The expression may not be valid. Expression: &quot;{0}&quot;.
+        /// </summary>
+        internal static string ExpressionInvalid {
+            get {
+                return ResourceManager.GetString("ExpressionInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File.
         /// </summary>
         internal static string FileSourceType {
@@ -205,6 +286,42 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The function &quot;{0}&quot; was not found..
+        /// </summary>
+        internal static string FunctionNotFound {
+            get {
+                return ResourceManager.GetString("FunctionNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The language expression index &apos;{0}&apos; is not valid for the object..
+        /// </summary>
+        internal static string IndexInvalid {
+            get {
+                return ResourceManager.GetString("IndexInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Output written to the following file: &apos;{0}&apos;.
+        /// </summary>
+        internal static string InfoOutputPath {
+            get {
+                return ResourceManager.GetString("InfoOutputPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The input path was added: {0}.
+        /// </summary>
+        internal static string InputAdded {
+            get {
+                return ResourceManager.GetString("InputAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An invalid ErrorAction ({0}) was specified for rule at {1}. Ignore | Stop are supported..
         /// </summary>
         internal static string InvalidErrorAction {
@@ -219,6 +336,15 @@ namespace PSRule.Resources {
         internal static string InvalidResourceName {
             get {
                 return ResourceManager.GetString("InvalidResourceName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The resource &apos;{0}&apos; is not an accepted specification for &apos;{1}&apos;..
+        /// </summary>
+        internal static string InvalidResourceSpecification {
+            get {
+                return ResourceManager.GetString("InvalidResourceSpecification", resourceCulture);
             }
         }
         
@@ -268,11 +394,20 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [PSRule][S][Trace] -- {0}: {1} {0} {2}.
+        ///   Looks up a localized string similar to [PSRule][{0}][Trace] -- {1}: {2}.
         /// </summary>
-        internal static string LanguageExpressionTrace {
+        internal static string LanguageExpressionTraceP2 {
             get {
-                return ResourceManager.GetString("LanguageExpressionTrace", resourceCulture);
+                return ResourceManager.GetString("LanguageExpressionTraceP2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [PSRule][{0}][Trace] -- {1}: {2} {1} {3}.
+        /// </summary>
+        internal static string LanguageExpressionTraceP3 {
+            get {
+                return ResourceManager.GetString("LanguageExpressionTraceP3", resourceCulture);
             }
         }
         
@@ -304,11 +439,11 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update module &apos;{0}&apos; to set the default baseline using a module configuration resource instead. Configuring the default baseline via manifest will be removed in the next major version. See https://aka.ms/ps-rule/module-config..
+        ///   Looks up a localized string similar to No valid module can be found with: Name={0}, Version={1}.
         /// </summary>
-        internal static string ModuleManifestBaseline {
+        internal static string ModuleNotFound {
             get {
-                return ResourceManager.GetString("ModuleManifestBaseline", resourceCulture);
+                return ResourceManager.GetString("ModuleNotFound", resourceCulture);
             }
         }
         
@@ -318,6 +453,24 @@ namespace PSRule.Resources {
         internal static string ObjectNotProcessed {
             get {
                 return ResourceManager.GetString("ObjectNotProcessed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Object path not found..
+        /// </summary>
+        internal static string ObjectPathNotFound {
+            get {
+                return ResourceManager.GetString("ObjectPathNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The object path expression reached the maximum depth of {0} evaluating the path &apos;{1}&apos;..
+        /// </summary>
+        internal static string ObjectPathRecurseMaxDepth {
+            get {
+                return ResourceManager.GetString("ObjectPathRecurseMaxDepth", resourceCulture);
             }
         }
         
@@ -394,6 +547,15 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The language expression property &apos;{0}&apos; doesn&apos;t exist..
+        /// </summary>
+        internal static string PropertyNotFound {
+            get {
+                return ResourceManager.GetString("PropertyNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property &apos;${0}.{1}&apos; is obsolete and will be removed in the next major version..
         /// </summary>
         internal static string PropertyObsolete {
@@ -403,11 +565,119 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to PSR0001: Unable to read options file &apos;{0}&apos;. Please check the file is valid, indented correctly, and encoded as UTF-8. See https://aka.ms/ps-rule/ts-options. {1}.
+        /// </summary>
+        internal static string PSR0001 {
+            get {
+                return ResourceManager.GetString("PSR0001", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PSR0002: Summary results are not supported with Job Summaries. See https://aka.ms/ps-rule/troubleshooting..
+        /// </summary>
+        internal static string PSR0002 {
+            get {
+                return ResourceManager.GetString("PSR0002", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PSR0003: The specified baseline group &apos;{0}&apos; is not known..
+        /// </summary>
+        internal static string PSR0003 {
+            get {
+                return ResourceManager.GetString("PSR0003", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PSR0004: The specified {0} resource &apos;{1}&apos; is not known..
+        /// </summary>
+        internal static string PSR0004 {
+            get {
+                return ResourceManager.GetString("PSR0004", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PSR0005: The {0} &apos;{1}&apos; is obsolete..
+        /// </summary>
+        internal static string PSR0005 {
+            get {
+                return ResourceManager.GetString("PSR0005", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PSR0006: Failed to deserialize the file &apos;{0}&apos;: {1}.
+        /// </summary>
+        internal static string PSR0006 {
+            get {
+                return ResourceManager.GetString("PSR0006", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PSR0007: The resource &apos;{0}&apos; using API &apos;{1}&apos; is not recognized as a valid PSRule resource (source: {2})..
+        /// </summary>
+        internal static string PSR0007 {
+            get {
+                return ResourceManager.GetString("PSR0007", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PSR0008: The capability &apos;{0}&apos; requested by the workspace is disabled..
+        /// </summary>
+        internal static string PSR0008 {
+            get {
+                return ResourceManager.GetString("PSR0008", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PSR0009: The capability &apos;{0}&apos; requested by the workspace is not supported..
+        /// </summary>
+        internal static string PSR0009 {
+            get {
+                return ResourceManager.GetString("PSR0009", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PSR0010: The capability &apos;{0}&apos; requested by the module &apos;{1}&apos; is disabled..
+        /// </summary>
+        internal static string PSR0010 {
+            get {
+                return ResourceManager.GetString("PSR0010", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PSR0011: The capability &apos;{0}&apos; requested by the module &apos;{1}&apos; is not supported..
+        /// </summary>
+        internal static string PSR0011 {
+            get {
+                return ResourceManager.GetString("PSR0011", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to deserialize the file &apos;{0}&apos;: {1}.
         /// </summary>
         internal static string ReadFileFailed {
             get {
                 return ResourceManager.GetString("ReadFileFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to read the path &apos;{0}&apos;: {1}.
+        /// </summary>
+        internal static string ReadInputFailed {
+            get {
+                return ResourceManager.GetString("ReadInputFailed", resourceCulture);
             }
         }
         
@@ -430,15 +700,6 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The {0} &apos;{1}&apos; is obsolete. Consider switching to an alternative {0}..
-        /// </summary>
-        internal static string ResourceObsolete {
-            get {
-                return ResourceManager.GetString("ResourceObsolete", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} rule/s were suppressed for &apos;{1}&apos;..
         /// </summary>
         internal static string RuleCountSuppressed {
@@ -457,6 +718,15 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rule &apos;{0}&apos; was excluded from run..
+        /// </summary>
+        internal static string RuleExcluded {
+            get {
+                return ResourceManager.GetString("RuleExcluded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to One or more rules reported failure..
         /// </summary>
         internal static string RuleFailPipelineException {
@@ -471,6 +741,15 @@ namespace PSRule.Resources {
         internal static string RuleInconclusive {
             get {
                 return ResourceManager.GetString("RuleInconclusive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [PSRule][R][Trace] -- {0}.
+        /// </summary>
+        internal static string RuleMatchTrace {
+            get {
+                return ResourceManager.GetString("RuleMatchTrace", resourceCulture);
             }
         }
         
@@ -592,15 +871,6 @@ namespace PSRule.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [PSRule][S][Trace] -- {0}: {1}.
-        /// </summary>
-        internal static string SelectorTrace {
-            get {
-                return ResourceManager.GetString("SelectorTrace", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Can not serialize a null PSObject..
         /// </summary>
         internal static string SerializeNullPSObject {
@@ -633,6 +903,24 @@ namespace PSRule.Resources {
         internal static string SourceNotFound {
             get {
                 return ResourceManager.GetString("SourceNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Suppression group &apos;{0}&apos; has expired and will be ignored..
+        /// </summary>
+        internal static string SuppressionGroupExpired {
+            get {
+                return ResourceManager.GetString("SuppressionGroupExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Using changed files: {0}.
+        /// </summary>
+        internal static string UsingChangedFile {
+            get {
+                return ResourceManager.GetString("UsingChangedFile", resourceCulture);
             }
         }
         

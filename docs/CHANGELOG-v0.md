@@ -1,3 +1,7 @@
+---
+discussion: false
+---
+
 # Change log
 
 See [upgrade notes][1] for helpful information when upgrading from previous versions.
@@ -6,7 +10,10 @@ See [upgrade notes][1] for helpful information when upgrading from previous vers
 
 !!! Attention
     PSRule v0 is a prior release.
-    Please upgrade to the latest version.
+    For more information see [v2][2] release notes.
+    Please check out our [upgrade notes][1] to get prepared for upgrading to the latest version.
+
+  [2]: https://microsoft.github.io/PSRule/latest/CHANGELOG-v2/
 
 ## v0.22.0
 

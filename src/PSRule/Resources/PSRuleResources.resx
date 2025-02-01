@@ -117,9 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ResourceObsolete" xml:space="preserve">
-    <value>The {0} '{1}' is obsolete. Consider switching to an alternative {0}.</value>
+  <data name="PSR0005" xml:space="preserve">
+    <value>PSR0005: The {0} '{1}' is obsolete.</value>
     <comment>Occurs when a resource is used that has been flagged as obsolete.</comment>
+  </data>
+  <data name="ArgumentFormatInvalid" xml:space="preserve">
+    <value>The arguments for '{0}' are not in the expected format or type.</value>
+  </data>
+  <data name="ArgumentInvalidBoolean" xml:space="preserve">
+    <value>The argument '{0}' for '{1}' is not a valid boolean.</value>
+  </data>
+  <data name="ArgumentInvalidInteger" xml:space="preserve">
+    <value>The argument '{0}' for '{1}' is not a valid integer.</value>
+  </data>
+  <data name="ArgumentInvalidString" xml:space="preserve">
+    <value>The argument '{0}' for '{1}' is not a valid string.</value>
+  </data>
+  <data name="ArgumentsOutOfRange" xml:space="preserve">
+    <value>The number of arguments '{1}' is not within the allowed range for '{0}'.</value>
+  </data>
+  <data name="BaselineObsolete" xml:space="preserve">
+    <value>The baseline '{0}' is obsolete. Consider switching to an alternative baseline.</value>
+    <comment>Occurs when a baseline is used that has been flagged as obsolete.</comment>
   </data>
   <data name="ConstrainedTargetBinding" xml:space="preserve">
     <value>Binding functions are not supported in this language mode.</value>
@@ -144,9 +163,9 @@
     <value>The dependency '{0}' for '{1}' could not be found. Check that the rule is defined in a .Rule.ps1 file within the search path.</value>
     <comment>Occurs when a rule dependency is not discovered.</comment>
   </data>
-  <data name="DuplicateRuleId" xml:space="preserve">
-    <value>A rule with the same id '{0}' already exists.</value>
-    <comment>Occurs when the same rule id is used.</comment>
+  <data name="DuplicateResourceId" xml:space="preserve">
+    <value>The resource '{0}' is using a duplicate resource identifier. A resource with the identifier '{1}' already exists. Each resource must have a unique name, ref, and aliases. See https://aka.ms/ps-rule/naming for guidance on naming within PSRule.</value>
+    <comment>Occurs when the same resource id is used.</comment>
   </data>
   <data name="DuplicateRuleName" xml:space="preserve">
     <value>A rule with the same name '{0}' already exists.</value>
@@ -164,8 +183,17 @@
   <data name="FileSourceType" xml:space="preserve">
     <value>File</value>
   </data>
+  <data name="ExpressionInvalid" xml:space="preserve">
+    <value>Failed to parse expression. The expression may not be valid. Expression: "{0}"</value>
+  </data>
   <data name="FoundModules" xml:space="preserve">
     <value>[PSRule][D] -- Found {0} PSRule module(s)</value>
+  </data>
+  <data name="FunctionNotFound" xml:space="preserve">
+    <value>The function "{0}" was not found.</value>
+  </data>
+  <data name="IndexInvalid" xml:space="preserve">
+    <value>The language expression index '{0}' is not valid for the object.</value>
   </data>
   <data name="InvalidErrorAction" xml:space="preserve">
     <value>An invalid ErrorAction ({0}) was specified for rule at {1}. Ignore | Stop are supported.</value>
@@ -186,8 +214,8 @@
   <data name="KeywordSourceScope" xml:space="preserve">
     <value>The keyword '{0}' can not be nested in a Rule block.</value>
   </data>
-  <data name="LanguageExpressionTrace" xml:space="preserve">
-    <value>[PSRule][S][Trace] -- {0}: {1} {0} {2}</value>
+  <data name="LanguageExpressionTraceP3" xml:space="preserve">
+    <value>[PSRule][{0}][Trace] -- {1}: {2} {1} {3}</value>
   </data>
   <data name="LaunchBrowser" xml:space="preserve">
     <value>Please open your browser to the following location: {0}</value>
@@ -197,9 +225,6 @@
   </data>
   <data name="MatchTrue" xml:space="preserve">
     <value>Matches: {0}</value>
-  </data>
-  <data name="ModuleManifestBaseline" xml:space="preserve">
-    <value>Update module '{0}' to set the default baseline using a module configuration resource instead. Configuring the default baseline via manifest will be removed in the next major version. See https://aka.ms/ps-rule/module-config.</value>
   </data>
   <data name="ObjectNotProcessed" xml:space="preserve">
     <value>Target object '{0}' has not been processed because no matching rules were found.</value>
@@ -228,6 +253,9 @@
   </data>
   <data name="OutcomeUnknown" xml:space="preserve">
     <value>Unknown</value>
+  </data>
+  <data name="PropertyNotFound" xml:space="preserve">
+    <value>The language expression property '{0}' doesn't exist.</value>
   </data>
   <data name="PropertyObsolete" xml:space="preserve">
     <value>The property '${0}.{1}' is obsolete and will be removed in the next major version.</value>
@@ -288,8 +316,8 @@
   <data name="SelectorMatchTrace" xml:space="preserve">
     <value>[PSRule][S][Trace] -- {0}</value>
   </data>
-  <data name="SelectorTrace" xml:space="preserve">
-    <value>[PSRule][S][Trace] -- {0}: {1}</value>
+  <data name="LanguageExpressionTraceP2" xml:space="preserve">
+    <value>[PSRule][{0}][Trace] -- {1}: {2}</value>
   </data>
   <data name="SerializeNullPSObject" xml:space="preserve">
     <value>Can not serialize a null PSObject.</value>
@@ -335,5 +363,74 @@
   </data>
   <data name="RuleSuppressionGroupExtendedCount" xml:space="preserve">
     <value>{0} rule/s were suppressed by suppression group '{1}' for '{2}'. {3}</value>
+  </data>
+  <data name="InfoOutputPath" xml:space="preserve">
+    <value>Output written to the following file: '{0}'</value>
+  </data>
+  <data name="ModuleNotFound" xml:space="preserve">
+    <value>No valid module can be found with: Name={0}, Version={1}</value>
+  </data>
+  <data name="RuleMatchTrace" xml:space="preserve">
+    <value>[PSRule][R][Trace] -- {0}</value>
+  </data>
+  <data name="ObjectPathNotFound" xml:space="preserve">
+    <value>Object path not found.</value>
+  </data>
+  <data name="DebugTargetSubselectorMismatch" xml:space="preserve">
+    <value>Target failed sub-selector pre-condition.</value>
+  </data>
+  <data name="InputAdded" xml:space="preserve">
+    <value>The input path was added: {0}</value>
+  </data>
+  <data name="UsingChangedFile" xml:space="preserve">
+    <value>Using changed files: {0}</value>
+  </data>
+  <data name="ObjectPathRecurseMaxDepth" xml:space="preserve">
+    <value>The object path expression reached the maximum depth of {0} evaluating the path '{1}'.</value>
+  </data>
+  <data name="SuppressionGroupExpired" xml:space="preserve">
+    <value>Suppression group '{0}' has expired and will be ignored.</value>
+  </data>
+  <data name="PSR0001" xml:space="preserve">
+    <value>PSR0001: Unable to read options file '{0}'. Please check the file is valid, indented correctly, and encoded as UTF-8. See https://aka.ms/ps-rule/ts-options. {1}</value>
+  </data>
+  <data name="DeprecatedOption" xml:space="preserve">
+    <value>The option '{0}' is deprecated and will be removed with PSRule v3. See http://aka.ms/ps-rule/deprecations for more detail.</value>
+  </data>
+  <data name="PSR0002" xml:space="preserve">
+    <value>PSR0002: Summary results are not supported with Job Summaries. See https://aka.ms/ps-rule/troubleshooting.</value>
+  </data>
+  <data name="RuleExcluded" xml:space="preserve">
+    <value>Rule '{0}' was excluded from run.</value>
+  </data>
+  <data name="ReadInputFailed" xml:space="preserve">
+    <value>Failed to read the path '{0}': {1}</value>
+  </data>
+  <data name="PSR0003" xml:space="preserve">
+    <value>PSR0003: The specified baseline group '{0}' is not known.</value>
+  </data>
+  <data name="PSR0004" xml:space="preserve">
+    <value>PSR0004: The specified {0} resource '{1}' is not known.</value>
+  </data>
+  <data name="PSR0006" xml:space="preserve">
+    <value>PSR0006: Failed to deserialize the file '{0}': {1}</value>
+  </data>
+  <data name="InvalidResourceSpecification" xml:space="preserve">
+    <value>The resource '{0}' is not an accepted specification for '{1}'.</value>
+  </data>
+  <data name="PSR0007" xml:space="preserve">
+    <value>PSR0007: The resource '{0}' using API '{1}' is not recognized as a valid PSRule resource (source: {2}).</value>
+  </data>
+  <data name="PSR0008" xml:space="preserve">
+    <value>PSR0008: The capability '{0}' requested by the workspace is disabled.</value>
+  </data>
+  <data name="PSR0009" xml:space="preserve">
+    <value>PSR0009: The capability '{0}' requested by the workspace is not supported.</value>
+  </data>
+  <data name="PSR0010" xml:space="preserve">
+    <value>PSR0010: The capability '{0}' requested by the module '{1}' is disabled.</value>
+  </data>
+  <data name="PSR0011" xml:space="preserve">
+    <value>PSR0011: The capability '{0}' requested by the module '{1}' is not supported.</value>
   </data>
 </root>

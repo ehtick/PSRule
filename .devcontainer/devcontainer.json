@@ -1,25 +1,40 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
-    "name": "PSRule dev",
-    "settings": {
+  "name": "PSRule Developer",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0-noble",
+  "customizations": {
+    "vscode": {
+      "settings": {
         "terminal.integrated.defaultProfile.linux": "pwsh",
         "terminal.integrated.profiles.linux": {
-            "pwsh": {
-                "path": "/bin/pwsh"
-            }
+          "pwsh": {
+            "path": "/usr/bin/pwsh"
+          }
         }
-    },
-    "extensions": [
-        "ms-azure-devops.azure-pipelines",
-        "davidanson.vscode-markdownlint",
-        "bewhite.psrule-vscode-preview",
-        "ms-dotnettools.csharp",
-        "eamodio.gitlens",
+      },
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-vscode.powershell",
         "github.vscode-pull-request-github",
-        "streetsidesoftware.code-spell-checker"
-    ],
-    "features": {
-        "github-cli": "latest"
+        "davidanson.vscode-markdownlint",
+        "streetsidesoftware.code-spell-checker",
+        "bewhite.psrule-vscode-preview",
+        "eamodio.gitlens",
+        "ms-sarifvscode.sarif-viewer",
+        "github.vscode-github-actions"
+      ]
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
     },
-    "onCreateCommand": "/bin/pwsh -f .devcontainer/container-build.ps1",
-    "postStartCommand": "/bin/pwsh -f .devcontainer/container-start.ps1"
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "latest"
+    }
+  },
+  "onCreateCommand": "dotnet tool install --global PowerShell --version 7.4.6 && sudo chown -R vscode:vscode /usr/bin/pwsh && sudo apt-get update -y && sudo apt-get upgrade -y && dotnet restore && pip install -r requirements-docs.txt && ln /usr/bin/pwsh /home/vscode/.dotnet/tools/pwsh --force",
+  "updateContentCommand": "/usr/bin/pwsh -f .devcontainer/container-build.ps1",
+  "postStartCommand": "/usr/bin/pwsh -f .devcontainer/container-start.ps1"
 }

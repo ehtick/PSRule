@@ -1,0 +1,44 @@
+#
+# PSRule configuration for CI of PSRule repo.
+#
+
+# Please see the documentation for all configuration options:
+# https://microsoft.github.io/PSRule/
+
+repository:
+  url: https://github.com/microsoft/PSRule
+  baseRef: main
+
+run:
+  category: CI repository scan
+  description: An analysis scan that checks repository files aligned to expected format requirements.
+
+requires:
+  PSRule.Rules.MSFT.OSS: '>=1.1.0'
+
+capabilities:
+  - api-2025-01-01
+  - api-v1
+
+output:
+  culture:
+    - en-US
+
+include:
+  module:
+    - PSRule.Rules.MSFT.OSS
+
+format:
+  powershell_data:
+    type: []
+
+input:
+  fileObjects: true
+  pathIgnore:
+    - '**'
+    - '!**/*.cs'
+    - '!**/*.ps1'
+    - '!**/*.psd1'
+    - '!**/*.psm1'
+    - '*.Designer.cs'
+    - '*.csproj'

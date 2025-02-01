@@ -1,145 +1,105 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.ComponentModel;
 using Newtonsoft.Json;
 using PSRule.Data;
 using PSRule.Definitions;
 using PSRule.Definitions.Rules;
-using PSRule.Pipeline;
 using YamlDotNet.Serialization;
 
-namespace PSRule.Rules
+namespace PSRule.Rules;
+
+/// <summary>
+/// Define a single rule.
+/// </summary>
+[JsonObject]
+public sealed class Rule : IDependencyTarget, ITargetInfo, IResource, IRuleV1
 {
     /// <summary>
-    /// Define a single rule.
+    /// A unique identifier for the rule.
     /// </summary>
-    [JsonObject]
-    public sealed class Rule : IDependencyTarget, ITargetInfo, IResource, IRuleV1
-    {
-        /// <summary>
-        /// A unique identifier for the rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "id", Required = Required.Always)]
-        public ResourceId Id { get; set; }
+    [JsonProperty(PropertyName = "id", Required = Required.Always)]
+    public ResourceId Id { get; set; }
 
-        /// <summary>
-        /// The name of the rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "name", Required = Required.Always)]
-        public string Name => Id.Name;
+    /// <summary>
+    /// The name of the rule.
+    /// </summary>
+    [JsonProperty(PropertyName = "name", Required = Required.Always)]
+    public string Name => Id.Name;
 
-        /// <summary>
-        /// If the rule fails, how serious is the result.
-        /// </summary>
-        [JsonProperty(PropertyName = "level")]
-        public SeverityLevel Level { get; set; }
+    /// <summary>
+    /// If the rule fails, how serious is the result.
+    /// </summary>
+    [JsonProperty(PropertyName = "level")]
+    public SeverityLevel Level { get; set; }
 
-        /// <summary>
-        /// Legacy. A unique identifier for the rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "ruleId", Required = Required.Always)]
-        [Obsolete("Use Id instead")]
-        public string RuleId => Id.Value;
+    /// <summary>
+    /// A human readable block of text, used to identify the purpose of the rule.
+    /// </summary>
+    [JsonIgnore, YamlIgnore]
+    public string Synopsis => Info.Synopsis;
 
-        /// <summary>
-        /// Legacy. The name of the rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "ruleName", Required = Required.Always)]
-        [Obsolete("Use Name instead")]
-        public string RuleName => Name;
+    /// <summary>
+    /// One or more tags assigned to the rule. Tags are additional metadata used to select rules to execute and identify results.
+    /// </summary>
+    [JsonProperty(PropertyName = "tag")]
+    [DefaultValue(null)]
+    public IResourceTags Tag { get; set; }
 
-        /// <summary>
-        /// The script file path where the rule is defined.
-        /// </summary>
-        [JsonIgnore]
-        [YamlIgnore]
-        [Obsolete("Use Source property instead.")]
-        public string SourcePath => Source.Path;
+    /// <inheritdoc/>
+    [JsonProperty(PropertyName = "info")]
+    [DefaultValue(null)]
+    public RuleHelpInfo Info { get; set; }
 
-        /// <summary>
-        /// The name of the module where the rule is defined, or null if the rule is not defined in a module.
-        /// </summary>
-        [JsonIgnore]
-        [YamlIgnore]
-        [Obsolete("Use Source property instead.")]
-        public string ModuleName => Source.Module;
+    /// <inheritdoc/>
+    [JsonProperty(PropertyName = "source")]
+    [DefaultValue(null)]
+    public ISourceFile Source { get; set; }
 
-        /// <summary>
-        /// A human readable block of text, used to identify the purpose of the rule.
-        /// </summary>
-        [JsonIgnore]
-        [YamlIgnore]
-        public string Synopsis => Info.Synopsis;
+    /// <summary>
+    /// Other rules that must completed successfully before calling this rule.
+    /// </summary>
+    [JsonProperty(PropertyName = "dependsOn")]
+    public ResourceId[] DependsOn { get; set; }
 
-        /// <summary>
-        /// Legacy. Alias to synopsis
-        /// </summary>
-        [JsonIgnore]
-        [YamlIgnore]
-        [Obsolete("Use Synopsis instead.")]
-        public string Description => Info.Synopsis;
+    /// <inheritdoc/>
+    [JsonIgnore, YamlIgnore]
+    public ResourceFlags Flags { get; set; }
 
-        /// <summary>
-        /// One or more tags assigned to the rule. Tags are additional metadata used to select rules to execute and identify results.
-        /// </summary>
-        [JsonProperty(PropertyName = "tag")]
-        [DefaultValue(null)]
-        public ResourceTags Tag { get; set; }
+    /// <inheritdoc/>
+    [JsonIgnore, YamlIgnore]
+    public ISourceExtent Extent { get; set; }
 
-        [JsonProperty(PropertyName = "info")]
-        [DefaultValue(null)]
-        public RuleHelpInfo Info { get; set; }
+    /// <inheritdoc/>
+    [JsonIgnore, YamlIgnore]
+    public IResourceLabels Labels { get; set; }
 
-        [JsonProperty(PropertyName = "source")]
-        [DefaultValue(null)]
-        public SourceFile Source { get; set; }
+    string ITargetInfo.TargetName => Name;
 
-        /// <summary>
-        /// Other rules that must completed successfully before calling this rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "dependsOn")]
-        public ResourceId[] DependsOn { get; set; }
+    string ITargetInfo.TargetType => typeof(Rule).FullName;
 
-        [JsonIgnore]
-        [YamlIgnore]
-        public ResourceFlags Flags { get; set; }
+    TargetSourceInfo ITargetInfo.Source => new() { File = Source.Path };
 
-        [JsonIgnore]
-        [YamlIgnore]
-        public ISourceExtent Extent { get; set; }
+    bool IDependencyTarget.Dependency => Source.IsDependency();
 
-        string ITargetInfo.TargetName => Name;
+    ResourceKind IResource.Kind => ResourceKind.Rule;
 
-        string ITargetInfo.TargetType => typeof(Rule).FullName;
+    string IResource.ApiVersion => Specs.V1;
 
-        TargetSourceInfo ITargetInfo.Source => new TargetSourceInfo { File = Source.Path };
+    string IResource.Name => Name;
 
-        bool IDependencyTarget.Dependency => Source.IsDependency();
+    IResourceHelpInfo IResource.Info => Info;
 
-        ResourceKind IResource.Kind => ResourceKind.Rule;
+    IResourceTags IResource.Tags => Tag;
 
-        string IResource.ApiVersion => Specs.V1;
+    InfoString IRuleV1.Recommendation => ((IRuleHelpInfoV2)Info)?.Recommendation;
 
-        string IResource.Name => Name;
+    /// <inheritdoc/>
+    [JsonIgnore, YamlIgnore]
+    public ResourceId? Ref { get; set; }
 
-        IResourceHelpInfo IResource.Info => Info;
-
-        ResourceTags IResource.Tags => Tag;
-
-        [Obsolete("Use Source property instead.")]
-        string ILanguageBlock.SourcePath => Source.Path;
-
-        [Obsolete("Use Source property instead.")]
-        string ILanguageBlock.Module => Source.Module;
-
-        [JsonIgnore]
-        [YamlIgnore]
-        public ResourceId? Ref { get; set; }
-
-        [JsonIgnore]
-        [YamlIgnore]
-        public ResourceId[] Alias { get; set; }
-    }
+    /// <inheritdoc/>
+    [JsonIgnore, YamlIgnore]
+    public ResourceId[] Alias { get; set; }
 }

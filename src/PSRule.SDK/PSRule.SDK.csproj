@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Microsoft.PSRule.SDK</AssemblyName>
+    <PackageId>Microsoft.PSRule.SDK</PackageId>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <ProjectGuid>{07a84e67-1ca3-4766-b9ea-1fdd9df6516f}</ProjectGuid>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PSRule\PSRule.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="PSRule.psd1;">
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+      <PackagePath>contentFiles\any\any\Modules\PSRule;content\Modules\PSRule</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Compile Remove="PSRule.psd1;" />
+  </ItemGroup>
+
+</Project>

@@ -27,12 +27,14 @@ Use the following template to define a suppression group:
 ```yaml
 ---
 # Synopsis: {{ Synopsis }}
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: SuppressionGroup
 metadata:
   name: '{{ Name }}'
 spec:
+  expiresOn: null
   rule: []
+  type: []
   if: { }
 ```
 
@@ -40,13 +42,15 @@ spec:
 [
   {
     // Synopsis: {{ Synopsis }}
-    "apiVersion": "github.com/microsoft/PSRule/v1",
+    "apiVersion": "github.com/microsoft/PSRule/2025-01-01",
     "kind": "SuppressionGroup",
     "metadata": {
       "name": "{{ Name }}"
     },
     "spec": {
+      "expiresOn": null,
       "rule": [],
+      "type": [],
       "if": {}
     }
   }
@@ -57,7 +61,15 @@ Set the `synopsis` to describe the justification for the suppression.
 Within the `rule` array, one or more rule names can be used.
 If no rules are specified, suppression will occur for all rules.
 Within the `if` object, one or more conditions or logical operators can be used.
+If the `if` object is empty, the selector will always evaluate to true.
 When the `if` condition is `true` the object will be suppressed for the current rule.
+
+Optionally, a `type` precondition can be used to define the type of object the suppression group is intended to evaluate.
+When not specified, the suppression group will apply to all object types, that match the `if` condition.
+
+Optionally, an expiry can be set using the `expiresOn` property.
+When the expiry date is reached, the suppression will no longer be applied.
+To configure an expiry, set a RFC3339 (ISO 8601) formatted date time using the format `yyyy-MM-ddTHH:mm:ssZ`.
 
 ### Documentation
 
@@ -84,7 +96,7 @@ Some examples of a suppression group synopsis include:
 
 ---
 # Synopsis: Ignore test objects by name.
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: SuppressionGroup
 metadata:
   name: SuppressWithTargetName
@@ -100,11 +112,12 @@ spec:
 
 ---
 # Synopsis: Ignore test objects by type.
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: SuppressionGroup
 metadata:
   name: SuppressWithTestType
 spec:
+  expiresOn: '2030-01-01T00:00:00Z'
   rule:
   - 'FromFile3'
   - 'FromFile5'
@@ -120,7 +133,7 @@ spec:
 [
   {
     // Synopsis: Ignore test objects by name.
-    "apiVersion": "github.com/microsoft/PSRule/v1",
+    "apiVersion": "github.com/microsoft/PSRule/2025-01-01",
     "kind": "SuppressionGroup",
     "metadata": {
       "name": "SuppressWithTargetName"
@@ -141,12 +154,13 @@ spec:
   },
   {
     // Synopsis: Ignore test objects by type.
-    "apiVersion": "github.com/microsoft/PSRule/v1",
+    "apiVersion": "github.com/microsoft/PSRule/2025-01-01",
     "kind": "SuppressionGroup",
     "metadata": {
       "name": "SuppressWithTestType"
     },
     "spec": {
+      "expiresOn": "2030-01-01T00:00:00Z",
       "rule": [
         "FromFile3",
         "FromFile5"
@@ -162,7 +176,7 @@ spec:
 
 ## NOTE
 
-An online version of this document is available at https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_SuppressionGroups/.
+An online version of this document is available at <https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_SuppressionGroups/>.
 
 ## SEE ALSO
 

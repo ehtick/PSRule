@@ -1,93 +1,52 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Management.Automation;
-using PSRule.Pipeline;
-using PSRule.Resources;
 using PSRule.Runtime;
 
-namespace PSRule.Definitions.Conventions
+namespace PSRule.Definitions.Conventions;
+
+[DebuggerDisplay("{Id}")]
+internal abstract class BaseConvention
 {
-    internal sealed class ConventionFilter : IResourceFilter
+    protected BaseConvention(ISourceFile source, string name)
     {
-        private readonly HashSet<string> _Include;
-        private readonly WildcardPattern _WildcardMatch;
-
-        public ConventionFilter(string[] include)
-        {
-            _Include = include == null || include.Length == 0 ? null : new HashSet<string>(include, StringComparer.OrdinalIgnoreCase);
-            _WildcardMatch = null;
-            if (include != null && include.Length > 0 && WildcardPattern.ContainsWildcardCharacters(include[0]))
-            {
-                if (include.Length > 1)
-                    throw new NotSupportedException(PSRuleResources.MatchSingleName);
-
-                _WildcardMatch = new WildcardPattern(include[0]);
-            }
-        }
-
-        ResourceKind IResourceFilter.Kind => ResourceKind.Convention;
-
-        public bool Match(IResource resource)
-        {
-            return _Include != null &&
-                (_Include.Contains(resource.Name) ||
-                 _Include.Contains(resource.Id.Value) ||
-                 MatchWildcard(resource.Name) ||
-                 MatchWildcard(resource.Id.Value));
-        }
-
-        private bool MatchWildcard(string name)
-        {
-            return _WildcardMatch != null && _WildcardMatch.IsMatch(name);
-        }
+        Source = source;
+        Name = name;
+        Id = new ResourceId(Source.Module, name, ResourceIdKind.Id);
     }
 
-    [DebuggerDisplay("{Id}")]
-    internal abstract class BaseConvention : IConvention
+    public ISourceFile Source { get; }
+
+    public ResourceId Id { get; }
+
+    /// <summary>
+    /// The name of the convention.
+    /// </summary>
+    public string Name { get; }
+
+    public string SourcePath => Source.Path;
+
+    public string Module => Source.Module;
+
+    public virtual void Initialize(RunspaceContext context, IEnumerable input)
     {
-        protected BaseConvention(SourceFile source, string name)
-        {
-            Source = source;
-            Name = name;
-            Id = new ResourceId(Source.Module, name, ResourceIdKind.Id);
-        }
 
-        public SourceFile Source { get; }
+    }
 
-        public ResourceId Id { get; }
+    public virtual void Begin(RunspaceContext context, IEnumerable input)
+    {
 
-        /// <summary>
-        /// The name of the convetion.
-        /// </summary>
-        public string Name { get; }
+    }
 
-        public string SourcePath => Source.Path;
+    public virtual void Process(RunspaceContext context, IEnumerable input)
+    {
 
-        public string Module => Source.Module;
+    }
 
-        public virtual void Initialize(RunspaceContext context, IEnumerable input)
-        {
+    public virtual void End(RunspaceContext context, IEnumerable input)
+    {
 
-        }
-
-        public virtual void Begin(RunspaceContext context, IEnumerable input)
-        {
-
-        }
-
-        public virtual void Process(RunspaceContext context, IEnumerable input)
-        {
-
-        }
-
-        public virtual void End(RunspaceContext context, IEnumerable input)
-        {
-
-        }
     }
 }

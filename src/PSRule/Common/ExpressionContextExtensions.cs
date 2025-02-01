@@ -1,16 +1,24 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using PSRule.Definitions.Expressions;
 using PSRule.Resources;
 
-namespace PSRule
+namespace PSRule;
+
+internal static class ExpressionContextExtensions
 {
-    internal static class ExpressionContextExtensions
+    public static bool ExpressionTrace(this IExpressionContext context, string name, object operand, object value)
     {
-        public static void ExpressionTrace(this ExpressionContext context, string name, object operand, object value)
-        {
-            context.Debug(PSRuleResources.LanguageExpressionTrace, name, operand, value);
-        }
+        var type = context.Kind == Definitions.ResourceKind.Rule ? 'R' : 'S';
+        context.Debug(PSRuleResources.LanguageExpressionTraceP3, type, name, operand, value);
+        return true;
+    }
+
+    public static bool ExpressionTrace(this IExpressionContext context, string name, object value)
+    {
+        var type = context.Kind == Definitions.ResourceKind.Rule ? 'R' : 'S';
+        context.Debug(PSRuleResources.LanguageExpressionTraceP2, type, name, value);
+        return true;
     }
 }

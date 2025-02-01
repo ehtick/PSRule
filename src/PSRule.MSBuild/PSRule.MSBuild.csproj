@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyTitle>PSRule.MSBuild</AssemblyTitle>
+    <EnableNuget>false</EnableNuget>
+    <IsPackable>false</IsPackable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.11.0" />
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <None Include="Generator.props" Pack="true" PackagePath="build" Visible="false" />
+  </ItemGroup>-->
+
+</Project>

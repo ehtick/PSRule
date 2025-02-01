@@ -70,7 +70,7 @@ Convention block limitations:
 - `End` can not use automatic variables except `$PSRule`.
   Most methods and properties of `$PSRule` are not available in `End`.
 
-By default, the `Process` block used.
+By default, the `Process` block is used.
 For example:
 
 ```powershell
@@ -105,8 +105,7 @@ Export-PSRuleConvention 'ExampleConvention' -Process {
 Conventions can be included by name within options in addition to using the `-Convention` parameter.
 To specify a convention within YAML options use the following:
 
-```yaml
-# Example ps-docs.yaml
+```yaml title="ps-rule.yaml"
 convention:
   include:
   - 'ExampleConvention1'
@@ -123,10 +122,9 @@ To use a convention included in a module use the `-Convention` parameter or opti
 A module can automatically include a convention by specifying the convention by name in module configuration.
 For example:
 
-```yaml
-# Example Config.Rule.yaml
+```yaml title="Config.Rule.yaml"
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: ModuleConfig
 metadata:
   name: ExampleModule
@@ -155,7 +153,7 @@ When conventions are specified from multiple locations PSRule orders conventions
 
 ## NOTE
 
-An online version of this document is available at https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Conventions/.
+An online version of this document is available at <https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Conventions/>.
 
 ## SEE ALSO
 

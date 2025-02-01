@@ -1,140 +1,121 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections;
 using System.Text;
 using Newtonsoft.Json;
 using PSRule.Definitions;
 using YamlDotNet.Serialization;
 
-namespace PSRule.Rules
+namespace PSRule.Rules;
+
+/// <summary>
+/// Output view helper class for rule help.
+/// </summary>
+public sealed class RuleHelpInfo : IRuleHelpInfoV2
 {
-    /// <summary>
-    /// Output view helper class for rule help.
-    /// </summary>
-    public sealed class RuleHelpInfo : IResourceHelpInfo
+    private readonly InfoString _Synopsis;
+    private readonly InfoString _Description;
+    private readonly InfoString _Recommendation;
+
+    internal RuleHelpInfo(string name, string displayName, string moduleName, InfoString synopsis = null, InfoString description = null, InfoString recommendation = null)
     {
-        private const string ONLINE_HELP_LINK_ANNOTATION = "online version";
+        Name = name;
+        DisplayName = displayName;
+        ModuleName = moduleName;
+        _Synopsis = synopsis ?? new InfoString();
+        _Description = description ?? new InfoString();
+        _Recommendation = recommendation ?? new InfoString();
+    }
 
-        internal RuleHelpInfo(string name, string displayName, string moduleName)
-        {
-            Name = name;
-            DisplayName = displayName;
-            ModuleName = moduleName;
-        }
+    /// <summary>
+    /// The name of the rule.
+    /// </summary>
+    [JsonProperty(PropertyName = "name")]
+    public string Name { get; private set; }
 
-        public sealed class Link
-        {
-            internal Link(string name, string uri)
-            {
-                Name = name;
-                Uri = uri;
-            }
+    /// <summary>
+    /// A localized display name for the rule.
+    /// </summary>
+    [JsonProperty(PropertyName = "displayName")]
+    public string DisplayName { get; private set; }
 
-            public string Name { get; private set; }
+    /// <summary>
+    /// The name of the module.
+    /// </summary>
+    /// <remarks>
+    /// This will be null if the rule is not contained within a module.
+    /// </remarks>
+    [JsonProperty(PropertyName = "moduleName")]
+    public string ModuleName { get; private set; }
 
-            public string Uri { get; private set; }
-        }
+    /// <summary>
+    /// The synopsis of the rule.
+    /// </summary>
+    [JsonProperty(PropertyName = "synopsis")]
+    public string Synopsis => _Synopsis.Text;
 
-        /// <summary>
-        /// The name of the rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "name")]
-        public string Name { get; private set; }
+    /// <summary>
+    /// An extended description of the rule.
+    /// </summary>
+    [JsonProperty(PropertyName = "description")]
+    public string Description => _Description.Text;
 
-        /// <summary>
-        /// A localized display name for the rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "displayName")]
-        public string DisplayName { get; private set; }
+    /// <summary>
+    /// The recommendation for the rule.
+    /// </summary>
+    [JsonProperty(PropertyName = "recommendation")]
+    public string Recommendation => _Recommendation.Text;
 
-        /// <summary>
-        /// The name of the module.
-        /// </summary>
-        /// <remarks>
-        /// This will be null if the rule is not contained within a module.
-        /// </remarks>
-        [JsonProperty(PropertyName = "moduleName")]
-        public string ModuleName { get; private set; }
+    /// <summary>
+    /// Additional notes for the rule.
+    /// </summary>
+    [JsonIgnore, YamlIgnore]
+    public string Notes { get; internal set; }
 
-        /// <summary>
-        /// The synopsis of the rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "synopsis")]
-        public string Synopsis { get; internal set; }
+    /// <summary>
+    /// Reference links for the rule.
+    /// </summary>
+    [JsonIgnore, YamlIgnore]
+    public Link[] Links { get; internal set; }
 
-        /// <summary>
-        /// An extended description of the rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "description")]
-        public string Description { get; internal set; }
+    /// <summary>
+    /// Metadata annotations for the rule.
+    /// </summary>
+    [JsonProperty(PropertyName = "annotations")]
+    public Hashtable Annotations { get; internal set; }
 
-        /// <summary>
-        /// The recommendation for the rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "recommendation")]
-        public string Recommendation { get; internal set; }
+    /// <inheritdoc/>
+    [JsonIgnore, YamlIgnore]
+    InfoString IRuleHelpInfoV2.Recommendation => _Recommendation;
 
-        /// <summary>
-        /// Additional notes for the rule.
-        /// </summary>
-        [JsonIgnore, YamlIgnore]
-        public string Notes { get; internal set; }
+    /// <inheritdoc/>
+    [JsonIgnore, YamlIgnore]
+    InfoString IResourceHelpInfo.Synopsis => _Synopsis;
 
-        /// <summary>
-        /// Reference links for the rule.
-        /// </summary>
-        [JsonIgnore, YamlIgnore]
-        public Link[] Links { get; internal set; }
+    /// <inheritdoc/>
+    [JsonIgnore, YamlIgnore]
+    InfoString IResourceHelpInfo.Description => _Description;
 
-        /// <summary>
-        /// Metadata annotations for the rule.
-        /// </summary>
-        [JsonProperty(PropertyName = "annotations")]
-        public Hashtable Annotations { get; internal set; }
-
-        [JsonIgnore, YamlIgnore]
-        InfoString IResourceHelpInfo.Synopsis { get; set; }
-
-        [JsonIgnore, YamlIgnore]
-        InfoString IResourceHelpInfo.Description { set; get; }
-
-        /// <summary>
-        /// Get the URI for the online version of the documentation.
-        /// </summary>
-        /// <returns>A URI when a valid link is set. Otherwise null is returned.</returns>
-        public Uri GetOnlineHelpUri()
-        {
-            if (Annotations == null || !Annotations.ContainsKey(ONLINE_HELP_LINK_ANNOTATION))
-                return null;
-
-            if (Uri.TryCreate(Annotations[ONLINE_HELP_LINK_ANNOTATION].ToString(), UriKind.Absolute, out var result))
-                return result;
-
+    /// <summary>
+    /// Get a view link string for display in rule help.
+    /// </summary>
+    public string GetLinkString()
+    {
+        if (Links == null)
             return null;
-        }
 
-        /// <summary>
-        /// Get a view link string for display in rule help.
-        /// </summary>
-        public string GetLinkString()
+        var sb = new StringBuilder();
+        for (var i = 0; i < Links.Length; i++)
         {
-            if (Links == null)
-                return null;
-
-            var sb = new StringBuilder();
-            for (var i = 0; i < Links.Length; i++)
+            sb.Append(Links[i].Name);
+            if (!string.IsNullOrEmpty(Links[i].Uri))
             {
-                sb.Append(Links[i].Name);
-                if (!string.IsNullOrEmpty(Links[i].Uri))
-                {
-                    sb.Append(": ");
-                    sb.Append(Links[i].Uri);
-                }
-                sb.Append(Environment.NewLine);
+                sb.Append(": ");
+                sb.Append(Links[i].Uri);
             }
-            return sb.ToString();
+            sb.Append(System.Environment.NewLine);
         }
+        return sb.ToString();
     }
 }

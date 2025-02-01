@@ -1,7 +1,12 @@
+---
+title: Support for PSRule
+author: BernieWhite
+discussion: false
+---
+
 # Support
 
 This project uses GitHub Issues to track bugs and feature requests.
-<!-- Before logging an issue please see our [troubleshooting guide]. -->
 
 Please search the existing issues before filing new issues to avoid duplicates.
 
@@ -14,4 +19,3 @@ Support for this project/ product is limited to the resources listed above.
 
 [issue]: https://github.com/microsoft/PSRule/issues
 [discussion]: https://github.com/microsoft/PSRule/discussions
-<!-- [troubleshooting guide]: troubleshooting.md -->

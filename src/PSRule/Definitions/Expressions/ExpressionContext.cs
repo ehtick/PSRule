@@ -1,111 +1,93 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
-using PSRule.Pipeline;
+using PSRule.Data;
 using PSRule.Runtime;
 using PSRule.Runtime.ObjectPath;
 
-namespace PSRule.Definitions.Expressions
+namespace PSRule.Definitions.Expressions;
+
+internal sealed class ExpressionContext : IExpressionContext, IBindingContext
 {
-    internal interface IExpressionContext : IBindingContext
+    private readonly Dictionary<string, PathExpression> _NameTokenCache;
+
+    private List<ResultReason> _Reason;
+
+    internal ExpressionContext(RunspaceContext context, ISourceFile source, ResourceKind kind, ITargetObject current, ResourceId? ruleId = null)
     {
-        string LanguageScope { get; }
-
-        void Reason(IOperand operand, string text, params object[] args);
-
-        void Reason(string text, params object[] args);
-
-        RunspaceContext GetContext();
+        Context = context ?? throw new ArgumentNullException(nameof(context));
+        Source = source;
+        LanguageScope = source.Module;
+        Kind = kind;
+        RuleId = ruleId;
+        _NameTokenCache = [];
+        Current = current;
     }
 
-    internal sealed class ExpressionContext : IExpressionContext, IBindingContext
+    public ISourceFile Source { get; }
+
+    public string LanguageScope { get; }
+
+    public ResourceKind Kind { get; }
+
+    public ITargetObject Current { get; }
+
+    /// <inheritdoc/>
+    public ResourceId? RuleId { get; }
+
+    public RunspaceContext Context { get; }
+
+    [DebuggerStepThrough]
+    void IBindingContext.CachePathExpression(string path, PathExpression expression)
     {
-        private readonly Dictionary<string, PathExpression> _NameTokenCache;
+        _NameTokenCache[path] = expression;
+    }
 
-        private List<string> _Reason;
+    [DebuggerStepThrough]
+    bool IBindingContext.GetPathExpression(string path, out PathExpression expression)
+    {
+        return _NameTokenCache.TryGetValue(path, out expression);
+    }
 
-        internal ExpressionContext(SourceFile source)
-        {
-            Source = source;
-            LanguageScope = source.Module;
-            _NameTokenCache = new Dictionary<string, PathExpression>();
-        }
+    public void Debug(string message, params object[] args)
+    {
+        if (Context.Writer == null)
+            return;
 
-        public SourceFile Source { get; }
+        Context.Writer.WriteDebug(message, args);
+    }
 
-        public string LanguageScope { get; }
+    public void PushScope(RunspaceScope scope)
+    {
+        Context.PushScope(scope);
+        Context.EnterLanguageScope(Source);
+    }
 
-        [DebuggerStepThrough]
-        void IBindingContext.CachePathExpression(string path, PathExpression expression)
-        {
-            _NameTokenCache[path] = expression;
-        }
+    public void PopScope(RunspaceScope scope)
+    {
+        Context.PopScope(scope);
+    }
 
-        [DebuggerStepThrough]
-        bool IBindingContext.GetPathExpression(string path, out PathExpression expression)
-        {
-            return _NameTokenCache.TryGetValue(path, out expression);
-        }
+    public void Reason(IOperand operand, string text, params object[] args)
+    {
+        if (string.IsNullOrEmpty(text) || !Context.IsScope(RunspaceScope.Rule))
+            return;
 
-        internal void Debug(string message, params object[] args)
-        {
-            if (RunspaceContext.CurrentThread?.Writer == null)
-                return;
+        AddReason(new ResultReason(Context.TargetObject?.Path, operand, text, args));
+    }
 
-            RunspaceContext.CurrentThread.Writer.WriteDebug(message, args);
-        }
+    internal ResultReason[] GetReasons()
+    {
+        return _Reason == null || _Reason.Count == 0 ? [] : [.. _Reason];
+    }
 
-        internal void PushScope(RunspaceScope scope)
-        {
-            RunspaceContext.CurrentThread.PushScope(scope);
-            RunspaceContext.CurrentThread.EnterSourceScope(Source);
-        }
+    private void AddReason(ResultReason reason)
+    {
+        _Reason ??= [];
 
-        internal void PopScope(RunspaceScope scope)
-        {
-            RunspaceContext.CurrentThread.PopScope(scope);
-        }
-
-        public void Reason(IOperand operand, string text, params object[] args)
-        {
-            if (string.IsNullOrEmpty(text))
-                return;
-
-            if (_Reason == null)
-                _Reason = new List<string>();
-
-            if (args == null || args.Length == 0)
-                _Reason.Add(string.Concat(operand.ToString(), ": ", text));
-            else
-                _Reason.Add(string.Concat(operand.ToString(), ": ", string.Format(Thread.CurrentThread.CurrentCulture, text, args)));
-        }
-
-        public void Reason(string text, params object[] args)
-        {
-            if (string.IsNullOrEmpty(text))
-                return;
-
-            if (_Reason == null)
-                _Reason = new List<string>();
-
-            if (args == null || args.Length == 0)
-                _Reason.Add(text);
-            else
-                _Reason.Add(string.Format(Thread.CurrentThread.CurrentCulture, text, args));
-        }
-
-        internal string[] GetReasons()
-        {
-            return _Reason == null || _Reason.Count == 0 ? Array.Empty<string>() : _Reason.ToArray();
-        }
-
-        public RunspaceContext GetContext()
-        {
-            return RunspaceContext.CurrentThread;
-        }
+        // Check if the reason already exists
+        if (!_Reason.Contains(reason))
+            _Reason.Add(reason);
     }
 }

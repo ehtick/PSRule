@@ -1,24 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Management.Automation;
 
-namespace PSRule.Definitions
+namespace PSRule.Definitions;
+
+/// <summary>
+/// A language condition.
+/// </summary>
+public interface ICondition : ILanguageBlock, IDisposable
 {
-    public interface IConditionResult
-    {
-        bool HadErrors { get; }
+    /// <summary>
+    /// Invoke the condition to get a result.
+    /// </summary>
+    /// <returns>Returns the result of the condition.</returns>
+    IConditionResult If();
 
-        int Count { get; }
-
-        int Pass { get; }
-    }
-
-    public interface ICondition : ILanguageBlock, IDisposable
-    {
-        IConditionResult If();
-
-        ActionPreference ErrorAction { get; }
-    }
+    /// <summary>
+    /// The action of error to take when execution the condition.
+    /// </summary>
+    ActionPreference ErrorAction { get; }
 }

@@ -1,101 +1,129 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Management.Automation;
+using Newtonsoft.Json.Linq;
 using PSRule.Data;
-using PSRule.Definitions.Selectors;
 
-namespace PSRule.Pipeline
+namespace PSRule.Pipeline;
+
+/// <summary>
+/// An object processed by PSRule.
+/// </summary>
+[DebuggerDisplay("Type = {TargetType}, Name = {TargetName}")]
+public sealed class TargetObject : ITargetObject
 {
-    internal abstract class TargetObjectAnnotation
-    {
+    private readonly Dictionary<Type, TargetObjectAnnotation> _Annotations;
 
+    private Hashtable _Data;
+
+    internal TargetObject(PSObject o)
+        : this(o, null) { }
+
+    internal TargetObject(PSObject o, TargetSourceCollection source)
+    {
+        o.ConvertTargetInfoProperty();
+        o.ConvertTargetInfoType();
+        Source = ReadSourceInfo(o, source);
+        Issue = ReadIssueInfo(o, null);
+        TargetName = o.GetTargetName();
+        TargetType = o.GetTargetType();
+        Scope = o.GetScope();
+        Path = ReadPath(o);
+        Value = Convert(o);
+        _Annotations = [];
     }
 
-    internal sealed class SelectorTargetAnnotation : TargetObjectAnnotation
+    internal TargetObject(PSObject o, string targetName = null, string targetType = null, string[] scope = null)
+        : this(o, null)
     {
-        private readonly Dictionary<Guid, bool> _Results;
+        if (!string.IsNullOrEmpty(targetName))
+            TargetName = targetName;
 
-        public SelectorTargetAnnotation()
-        {
-            _Results = new Dictionary<Guid, bool>();
-        }
+        if (!string.IsNullOrEmpty(targetType))
+            TargetType = targetType;
 
-        public bool TryGetSelectorResult(SelectorVisitor selector, out bool result)
-        {
-            return _Results.TryGetValue(selector.InstanceId, out result);
-        }
-
-        public void SetSelectorResult(SelectorVisitor selector, bool result)
-        {
-            _Results[selector.InstanceId] = result;
-        }
+        if (scope != null && scope.Length > 0)
+            Scope = scope;
     }
 
-    public sealed class TargetObject
+    internal PSObject Value { get; }
+
+    internal TargetSourceCollection Source { get; private set; }
+
+    internal TargetIssueCollection Issue { get; private set; }
+
+    internal string TargetName { [DebuggerStepThrough] get; }
+
+    internal string TargetType { [DebuggerStepThrough] get; }
+
+    internal string[] Scope { [DebuggerStepThrough] get; }
+
+    internal string Path { [DebuggerStepThrough] get; }
+
+    IEnumerable<TargetSourceInfo> ITargetObject.Source => Source.GetSourceInfo() ?? [];
+
+#nullable enable
+
+    string? ITargetObject.Name => TargetName;
+
+    string? ITargetObject.Type => TargetType;
+
+    string? ITargetObject.Path => Path;
+
+    object ITargetObject.Value => Value;
+
+    ITargetSourceMap? ITargetObject.SourceMap => null;
+
+#nullable restore
+
+    internal Hashtable GetData()
     {
-        private readonly Dictionary<Type, TargetObjectAnnotation> _Annotations;
+        return _Data == null || _Data.Count == 0 ? null : _Data;
+    }
 
-        private Hashtable _Data;
+    internal Hashtable RequireData()
+    {
+        _Data ??= [];
+        return _Data;
+    }
 
-        internal TargetObject(PSObject o)
-            : this(o, null) { }
-
-        internal TargetObject(PSObject o, TargetSourceCollection source)
+    internal T GetAnnotation<T>() where T : TargetObjectAnnotation, new()
+    {
+        if (!_Annotations.TryGetValue(typeof(T), out var value))
         {
-            Value = o;
-            Source = ReadSourceInfo(source);
-            Issue = ReadIssueInfo(null);
-            _Annotations = new Dictionary<Type, TargetObjectAnnotation>();
+            value = new T();
+            _Annotations.Add(typeof(T), value);
         }
+        return (T)value;
+    }
 
-        internal PSObject Value { get; }
+    private static string ReadPath(PSObject o)
+    {
+        return o.GetTargetPath();
+    }
 
-        internal TargetSourceCollection Source { get; private set; }
+    private static TargetSourceCollection ReadSourceInfo(PSObject o, TargetSourceCollection source)
+    {
+        var result = source ?? new TargetSourceCollection();
+        if (ExpressionHelpers.GetBaseObject(o) is ITargetInfo targetInfo)
+            result.Add(targetInfo.Source);
 
-        internal TargetIssueCollection Issue { get; private set; }
+        result.AddRange(o.GetSourceInfo());
+        return result;
+    }
 
-        internal Hashtable GetData()
-        {
-            return _Data == null || _Data.Count == 0 ? null : _Data;
-        }
+    private static TargetIssueCollection ReadIssueInfo(PSObject o, TargetIssueCollection issue)
+    {
+        var result = issue ?? new TargetIssueCollection();
+        result.AddRange(o.GetIssueInfo());
+        return result;
+    }
 
-        internal Hashtable RequireData()
-        {
-            _Data ??= new Hashtable();
-            return _Data;
-        }
-
-        internal T GetAnnotation<T>() where T : TargetObjectAnnotation, new()
-        {
-            if (!_Annotations.TryGetValue(typeof(T), out var value))
-            {
-                value = new T();
-                _Annotations.Add(typeof(T), value);
-            }
-            return (T)value;
-        }
-
-        private TargetSourceCollection ReadSourceInfo(TargetSourceCollection source)
-        {
-            var result = source ?? new TargetSourceCollection();
-            if (ExpressionHelpers.GetBaseObject(Value) is ITargetInfo targetInfo)
-                result.Add(targetInfo.Source);
-
-            Value.ConvertTargetInfoProperty();
-            result.AddRange(Value.GetSourceInfo());
-            return result;
-        }
-
-        private TargetIssueCollection ReadIssueInfo(TargetIssueCollection issue)
-        {
-            var result = issue ?? new TargetIssueCollection();
-            Value.ConvertTargetInfoProperty();
-            result.AddRange(Value.GetIssueInfo());
-            return result;
-        }
+    private static PSObject Convert(PSObject o)
+    {
+        return o.BaseObject is JToken token ? JsonHelper.ToPSObject(token) : o;
     }
 }

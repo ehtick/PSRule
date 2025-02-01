@@ -3,20 +3,16 @@
 
 using PSRule.Definitions;
 
-namespace PSRule
+namespace PSRule;
+
+internal static class ResourceHelpInfoExtensions
 {
-    internal static class ResourceHelpInfoExtensions
+    internal static void Update(this IResourceHelpInfo info, IResourceHelpInfo other)
     {
-        public static void Update(this IResourceHelpInfo info, IResourceHelpInfo other)
-        {
-            if (info == null || other == null)
-                return;
+        if (info == null || other == null)
+            return;
 
-            if (other.Synopsis != null && other.Synopsis.HasValue)
-                info.Synopsis = other.Synopsis;
-
-            if (other.Description != null && other.Description.HasValue)
-                info.Description = other.Description;
-        }
+        info.Synopsis.Update(other.Synopsis);
+        info.Description.Update(other.Description);
     }
 }

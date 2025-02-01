@@ -1,383 +1,463 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Management.Automation;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace PSRule.Pipeline
+namespace PSRule.Pipeline;
+
+/// <summary>
+/// A base class for runtime exceptions.
+/// </summary>
+public abstract class RuntimeException : PipelineException
 {
     /// <summary>
-    /// A base class for all pipeline exceptions.
+    /// Initialize a new instance of a PSRule exception that is thrown during runtime.
     /// </summary>
-    public abstract class PipelineException : Exception
+    protected RuntimeException()
+        : base() { }
+
+    /// <summary>
+    /// Initialize a new instance of a PSRule exception that is thrown during runtime.
+    /// </summary>
+    protected RuntimeException(string message)
+        : base(message) { }
+
+    /// <summary>
+    /// Initialize a new instance of a PSRule exception that is thrown during runtime.
+    /// </summary>
+    protected RuntimeException(string message, Exception innerException)
+        : base(message, innerException) { }
+
+    /// <summary>
+    /// Initialize a new instance of a PSRule exception that is thrown during runtime.
+    /// </summary>
+    protected RuntimeException(Exception innerException, InvocationInfo invocationInfo, string ruleId)
+        : base(innerException?.Message, innerException)
     {
-        protected PipelineException()
-            : base() { }
-
-        protected PipelineException(string message)
-            : base(message) { }
-
-        protected PipelineException(string message, Exception innerException)
-            : base(message, innerException) { }
-
-        protected PipelineException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        CommandInvocation = invocationInfo;
+        RuleId = ruleId;
     }
 
     /// <summary>
-    /// A base class for runtime exceptions.
+    /// Initialize a new instance of a PSRule exception that is thrown during runtime.
     /// </summary>
-    public abstract class RuntimeException : PipelineException
+    protected RuntimeException(SerializationInfo info, StreamingContext context)
+        : base(info, context) { }
+
+    /// <summary>
+    /// Additional information about the invocation when executing PowerShell language elements.
+    /// </summary>
+    public InvocationInfo CommandInvocation { get; }
+
+    /// <summary>
+    /// A unique identifier for the rule that was executing if currently within the context of a rule.
+    /// </summary>
+    public string RuleId { get; }
+}
+
+/// <summary>
+/// An exception when building the pipeline.
+/// </summary>
+[Serializable]
+public sealed class PipelineBuilderException : PipelineException
+{
+    /// <summary>
+    /// Creates a pipeline builder exception.
+    /// </summary>
+    public PipelineBuilderException()
+        : base() { }
+
+    /// <summary>
+    /// Creates a pipeline builder exception.
+    /// </summary>
+    /// <param name="message">The detail of the exception.</param>
+    public PipelineBuilderException(string message)
+        : base(message) { }
+
+    /// <summary>
+    /// Creates a pipeline builder exception.
+    /// </summary>
+    /// <param name="message">The detail of the exception.</param>
+    /// <param name="innerException">A nested exception that caused the issue.</param>
+    public PipelineBuilderException(string message, Exception innerException)
+        : base(message, innerException) { }
+
+    private PipelineBuilderException(SerializationInfo info, StreamingContext context)
+        : base(info, context) { }
+
+    /// <inheritdoc/>
+    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-        protected RuntimeException()
-            : base() { }
+        if (info == null)
+            throw new ArgumentNullException(nameof(info));
 
-        protected RuntimeException(string message)
-            : base(message) { }
+        base.GetObjectData(info, context);
+    }
+}
 
-        protected RuntimeException(string message, Exception innerException)
-            : base(message, innerException) { }
-
-        protected RuntimeException(Exception innerException, InvocationInfo invocationInfo, string ruleId)
-            : base(innerException?.Message, innerException)
-        {
-            CommandInvocation = invocationInfo;
-            RuleId = ruleId;
-        }
-
-        protected RuntimeException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-
-        public InvocationInfo CommandInvocation { get; }
-
-        public string RuleId { get; }
+/// <summary>
+/// A parser exception.
+/// </summary>
+[Serializable]
+public sealed class ParseException : PipelineException
+{
+    /// <summary>
+    /// Creates a parser exception.
+    /// </summary>
+    public ParseException()
+    {
     }
 
     /// <summary>
-    /// An exception when building the pipeline.
+    /// Creates a parser exception.
     /// </summary>
-    [Serializable]
-    public sealed class PipelineBuilderException : PipelineException
+    public ParseException(string message)
+        : base(message) { }
+
+    /// <summary>
+    /// Creates a parser exception.
+    /// </summary>
+    public ParseException(string message, Exception innerException)
+        : base(message, innerException) { }
+
+    /// <summary>
+    /// Creates a parser exception.
+    /// </summary>
+    /// <param name="message">The detail of the exception.</param>
+    /// <param name="errorId">A unique identifier related to the exception.</param>
+    internal ParseException(string message, string errorId) : base(message)
     {
-        /// <summary>
-        /// Creates a pipeline builder exception.
-        /// </summary>
-        public PipelineBuilderException()
-            : base() { }
-
-        /// <summary>
-        /// Creates a pipeline builder exception.
-        /// </summary>
-        /// <param name="message">The detail of the exception.</param>
-        public PipelineBuilderException(string message)
-            : base(message) { }
-
-        /// <summary>
-        /// Creates a pipeline builder exception.
-        /// </summary>
-        /// <param name="message">The detail of the exception.</param>
-        /// <param name="innerException">A nested exception that caused the issue.</param>
-        public PipelineBuilderException(string message, Exception innerException)
-            : base(message, innerException) { }
-
-        private PipelineBuilderException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
-
-            base.GetObjectData(info, context);
-        }
+        ErrorId = errorId;
     }
 
     /// <summary>
-    /// A serialization exception.
+    /// Creates a parser exception.
     /// </summary>
-    [Serializable]
-    public sealed class PipelineSerializationException : PipelineException
+    /// <param name="message">The detail of the exception.</param>
+    /// <param name="errorId">A unique identifier related to the exception.</param>
+    /// <param name="innerException">A nested exception that caused the issue.</param>
+    internal ParseException(string message, string errorId, Exception innerException) : base(message, innerException)
     {
-        /// <summary>
-        /// Creates a serialization exception.
-        /// </summary>
-        public PipelineSerializationException()
-        {
-        }
-
-        internal PipelineSerializationException(string message, string path, Exception innerException)
-            : this(message, innerException)
-        {
-            Path = path;
-        }
-
-        /// <summary>
-        /// Creates a serialization exception.
-        /// </summary>
-        /// <param name="message">The detail of the exception.</param>
-        public PipelineSerializationException(string message) : base(message)
-        {
-        }
-
-        /// <summary>
-        /// Creates a serialization exception.
-        /// </summary>
-        /// <param name="message">The detail of the exception.</param>
-        /// <param name="innerException">A nested exception that caused the issue.</param>
-        public PipelineSerializationException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        private PipelineSerializationException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
-
-        /// <summary>
-        /// The path to the file.
-        /// </summary>
-        public string Path { get; }
-
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
-
-            base.GetObjectData(info, context);
-        }
+        ErrorId = errorId;
     }
 
     /// <summary>
-    /// A parser exception.
+    /// Creates a parser exception.
     /// </summary>
-    [Serializable]
-    public sealed class ParseException : PipelineException
+    private ParseException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
-        /// <summary>
-        /// Creates a rule exception.
-        /// </summary>
-        public ParseException()
-        {
-        }
-
-        public ParseException(string message)
-            : base(message) { }
-
-        public ParseException(string message, Exception innerException)
-            : base(message, innerException) { }
-
-        /// <summary>
-        /// Creates a rule exception.
-        /// </summary>
-        /// <param name="message">The detail of the exception.</param>
-        internal ParseException(string message, string errorId) : base(message)
-        {
-            ErrorId = errorId;
-        }
-
-        /// <summary>
-        /// Creates a rule exception.
-        /// </summary>
-        /// <param name="message">The detail of the exception.</param>
-        /// <param name="innerException">A nested exception that caused the issue.</param>
-        internal ParseException(string message, string errorId, Exception innerException) : base(message, innerException)
-        {
-            ErrorId = errorId;
-        }
-
-        private ParseException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-            ErrorId = info.GetString("ErrorId");
-        }
-
-        public string ErrorId { get; }
-
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
-
-            info.AddValue("ErrorId", ErrorId);
-            base.GetObjectData(info, context);
-        }
+        ErrorId = info.GetString("ErrorId");
     }
 
     /// <summary>
-    /// A rule runtime exception.
+    /// An associated identifier related to why the exception was thrown.
     /// </summary>
-    [Serializable]
-    public sealed class RuleException : RuntimeException
+    public string ErrorId { get; }
+
+    /// <inheritdoc/>
+    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-        /// <summary>
-        /// Creates a rule runtime exception.
-        /// </summary>
-        public RuleException()
-        {
-        }
+        if (info == null) throw new ArgumentNullException(nameof(info));
 
-        /// <summary>
-        /// Creates a rule runtime exception.
-        /// </summary>
-        /// <param name="message">The detail of the exception.</param>
-        public RuleException(string message)
-            : base(message) { }
+        info.AddValue("ErrorId", ErrorId);
+        base.GetObjectData(info, context);
+    }
+}
 
-        /// <summary>
-        /// Creates a rule runtime exception.
-        /// </summary>
-        /// <param name="message">The detail of the exception.</param>
-        /// <param name="innerException">A nested exception that caused the issue.</param>
-        public RuleException(string message, Exception innerException)
-            : base(message, innerException) { }
-
-        internal RuleException(Exception innerException, InvocationInfo invocationInfo, string ruleId, ErrorRecord errorRecord)
-            : base(innerException, invocationInfo, ruleId)
-        {
-            ErrorRecord = errorRecord;
-        }
-
-        private RuleException(SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-
-        public ErrorRecord ErrorRecord { get; }
-
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
-
-            base.GetObjectData(info, context);
-        }
+/// <summary>
+/// A rule runtime exception.
+/// </summary>
+[Serializable]
+public sealed class RuleException : RuntimeException
+{
+    /// <summary>
+    /// Creates a rule runtime exception.
+    /// </summary>
+    public RuleException()
+    {
     }
 
     /// <summary>
-    /// A pipeline configuration exception.
+    /// Creates a rule runtime exception.
     /// </summary>
-    [Serializable]
-    public sealed class PipelineConfigurationException : PipelineException
+    /// <param name="message">The detail of the exception.</param>
+    public RuleException(string message)
+        : base(message) { }
+
+    /// <summary>
+    /// Creates a rule runtime exception.
+    /// </summary>
+    /// <param name="message">The detail of the exception.</param>
+    /// <param name="innerException">A nested exception that caused the issue.</param>
+    public RuleException(string message, Exception innerException)
+        : base(message, innerException) { }
+
+    /// <summary>
+    /// Creates a rule runtime exception.
+    /// </summary>
+    internal RuleException(Exception innerException, InvocationInfo invocationInfo, string ruleId, ErrorRecord errorRecord)
+        : base(innerException, invocationInfo, ruleId)
     {
-        /// <summary>
-        /// Creates a pipeline configuration exception.
-        /// </summary>
-        public PipelineConfigurationException()
-        {
-        }
-
-        /// <summary>
-        /// Creates a pipeline configuration exception.
-        /// </summary>
-        /// <param name="optionName">The name of the option that caused the exception.</param>
-        /// <param name="message">The detail of the exception.</param>
-        public PipelineConfigurationException(string optionName, string message) : base(message)
-        {
-        }
-
-        public PipelineConfigurationException(string message) : base(message)
-        {
-        }
-
-        public PipelineConfigurationException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        /// <summary>
-        /// Creates a pipeline configuration exception.
-        /// </summary>
-        /// <param name="optionName">The name of the option that caused the exception.</param>
-        /// <param name="message">The detail of the exception.</param>
-        /// <param name="innerException">A nested exception that caused the issue.</param>
-        public PipelineConfigurationException(string optionName, string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        private PipelineConfigurationException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
-
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
-
-            base.GetObjectData(info, context);
-        }
+        ErrorRecord = errorRecord;
     }
 
-    [Serializable]
-    public sealed class FailPipelineException : PipelineException
+    /// <summary>
+    /// Creates a rule runtime exception.
+    /// </summary>
+    private RuleException(SerializationInfo info, StreamingContext context)
+        : base(info, context) { }
+
+    /// <summary>
+    /// An associated error record related to the exception.
+    /// </summary>
+    public ErrorRecord ErrorRecord { get; }
+
+    /// <inheritdoc/>
+    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-        /// <summary>
-        /// Creates a rule runtime exception.
-        /// </summary>
-        public FailPipelineException()
-        {
-        }
+        if (info == null)
+            throw new ArgumentNullException(nameof(info));
 
-        /// <summary>
-        /// Creates a rule runtime exception.
-        /// </summary>
-        /// <param name="message">The detail of the exception.</param>
-        public FailPipelineException(string message) : base(message)
-        {
-        }
+        base.GetObjectData(info, context);
+    }
+}
 
-        public FailPipelineException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+/// <summary>
+/// A base class for configuration exceptions.
+/// </summary>
+public abstract class ConfigurationException : PipelineException
+{
+    /// <summary>
+    /// Initialize a new instance of a PSRule exception that is thrown when attempting to read configuration.
+    /// </summary>
+    protected ConfigurationException()
+        : base() { }
 
-        private FailPipelineException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+    /// <summary>
+    /// Initialize a new instance of a PSRule exception that is thrown when attempting to read configuration.
+    /// </summary>
+    protected ConfigurationException(string message)
+        : base(message) { }
 
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
+    /// <summary>
+    /// Initialize a new instance of a PSRule exception that is thrown when attempting to read configuration.
+    /// </summary>
+    protected ConfigurationException(string message, Exception innerException)
+        : base(message, innerException) { }
 
-            base.GetObjectData(info, context);
-        }
+    /// <summary>
+    /// Initialize a new instance of a PSRule exception that is thrown when attempting to read configuration.
+    /// </summary>
+    protected ConfigurationException(SerializationInfo info, StreamingContext context)
+        : base(info, context) { }
+}
+
+/// <summary>
+/// A pipeline configuration exception.
+/// </summary>
+[Serializable]
+public sealed class PipelineConfigurationException : ConfigurationException
+{
+    /// <summary>
+    /// Creates a pipeline configuration exception.
+    /// </summary>
+    public PipelineConfigurationException()
+    {
     }
 
-    [Serializable]
-    public sealed class RuntimeScopeException : PipelineException
+    /// <summary>
+    /// Creates a pipeline configuration exception.
+    /// </summary>
+    /// <param name="optionName">The name of the option that caused the exception.</param>
+    /// <param name="message">The detail of the exception.</param>
+    public PipelineConfigurationException(string optionName, string message) : base(message)
     {
-        /// <summary>
-        /// Creates a rule runtime exception.
-        /// </summary>
-        public RuntimeScopeException()
-        {
-        }
+    }
 
-        /// <summary>
-        /// Creates a rule runtime exception.
-        /// </summary>
-        /// <param name="message">The detail of the exception.</param>
-        public RuntimeScopeException(string message) : base(message)
-        {
-        }
+    /// <summary>
+    /// Creates a pipeline configuration exception.
+    /// </summary>
+    public PipelineConfigurationException(string message) : base(message)
+    {
+    }
 
-        public RuntimeScopeException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+    /// <summary>
+    /// Creates a pipeline configuration exception.
+    /// </summary>
+    public PipelineConfigurationException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
 
-        private RuntimeScopeException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+    /// <summary>
+    /// Creates a pipeline configuration exception.
+    /// </summary>
+    /// <param name="optionName">The name of the option that caused the exception.</param>
+    /// <param name="message">The detail of the exception.</param>
+    /// <param name="innerException">A nested exception that caused the issue.</param>
+    public PipelineConfigurationException(string optionName, string message, Exception innerException) : base(message, innerException)
+    {
+    }
 
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
+    /// <inheritdoc/>
+    private PipelineConfigurationException(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
+    }
 
-            base.GetObjectData(info, context);
-        }
+    /// <inheritdoc/>
+    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        if (info == null)
+            throw new ArgumentNullException(nameof(info));
+
+        base.GetObjectData(info, context);
+    }
+}
+
+/// <summary>
+/// A configuration parse exception.
+/// </summary>
+[Serializable]
+public sealed class ConfigurationParseException : ConfigurationException
+{
+    /// <summary>
+    /// Creates a configuration parse exception.
+    /// </summary>
+    public ConfigurationParseException()
+    {
+    }
+
+    /// <summary>
+    /// Creates a configuration parse exception.
+    /// </summary>
+    /// <param name="path">The path to the options file they cause the exception.</param>
+    /// <param name="message">The detail of the exception.</param>
+    public ConfigurationParseException(string path, string message)
+        : base(message)
+    {
+        Path = path;
+    }
+
+    /// <summary>
+    /// Creates a configuration parse exception.
+    /// </summary>
+    public ConfigurationParseException(string message)
+        : base(message) { }
+
+    /// <summary>
+    /// Creates a configuration parse exception.
+    /// </summary>
+    public ConfigurationParseException(string message, Exception innerException)
+        : base(message, innerException) { }
+
+    /// <summary>
+    /// Creates a configuration parse exception.
+    /// </summary>
+    /// <param name="path">The path to the options file they cause the exception</param>
+    /// <param name="message">The detail of the exception.</param>
+    /// <param name="innerException">A nested exception that caused the issue.</param>
+    public ConfigurationParseException(string path, string message, Exception innerException)
+        : base(message, innerException)
+    {
+        Path = path;
+    }
+
+    /// <inheritdoc/>
+    private ConfigurationParseException(SerializationInfo info, StreamingContext context)
+        : base(info, context) { }
+
+    /// <inheritdoc/>
+    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        if (info == null)
+            throw new ArgumentNullException(nameof(info));
+
+        base.GetObjectData(info, context);
+    }
+
+    /// <summary>
+    /// The path to the options file used.
+    /// </summary>
+    public string Path { get; }
+}
+
+/// <summary>
+/// An exception thrown by PSRule when the calling PowerShell environment should fail because one or more rules failed or errored.
+/// </summary>
+[Serializable]
+public sealed class FailPipelineException : PipelineException
+{
+    /// <inheritdoc/>
+    public FailPipelineException()
+    {
+    }
+
+    /// <inheritdoc/>
+    public FailPipelineException(string message) : base(message)
+    {
+    }
+
+    /// <inheritdoc/>
+    public FailPipelineException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
+
+    /// <inheritdoc/>
+    private FailPipelineException(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
+    }
+
+    /// <inheritdoc/>
+    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        if (info == null)
+            throw new ArgumentNullException(nameof(info));
+
+        base.GetObjectData(info, context);
+    }
+}
+
+/// <summary>
+/// An exception thrown by PSRule when a runtime property or method is used outside of the intended scope.
+/// Avoid using runtime variables outside of a PSRule pipeline.
+/// </summary>
+[Serializable]
+public sealed class RuntimeScopeException : PipelineException
+{
+    /// <inheritdoc/>
+    public RuntimeScopeException()
+    {
+    }
+
+    /// <inheritdoc/>
+    public RuntimeScopeException(string message) : base(message)
+    {
+    }
+
+    /// <inheritdoc/>
+    public RuntimeScopeException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
+
+    /// <inheritdoc/>
+    private RuntimeScopeException(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
+    }
+
+    /// <inheritdoc/>
+    [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        if (info == null)
+            throw new ArgumentNullException(nameof(info));
+
+        base.GetObjectData(info, context);
     }
 }

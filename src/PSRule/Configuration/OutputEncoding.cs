@@ -1,24 +1,45 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace PSRule.Configuration
+namespace PSRule.Configuration;
+
+/// <summary>
+/// The encoding format to convert output to.
+/// <seealso href="https://microsoft.github.io/PSRule/latest/concepts/PSRule/en-US/about_PSRule_Options/#outputencoding"/>
+/// </summary>
+[JsonConverter(typeof(StringEnumConverter))]
+public enum OutputEncoding
 {
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum OutputEncoding
-    {
-        Default = 0,
+    /// <summary>
+    /// UTF-8 with Byte Order Mark (BOM). This is the default.
+    /// </summary>
+    Default = 0,
 
-        UTF8,
+    /// <summary>
+    /// UTF-8 without Byte Order Mark (BOM).
+    /// </summary>
+    UTF8,
 
-        UTF7,
+    /// <summary>
+    /// UTF-7.
+    /// </summary>
+    UTF7,
 
-        Unicode,
+    /// <summary>
+    /// Unicode. Same as UTF-16.
+    /// </summary>
+    Unicode,
 
-        UTF32,
+    /// <summary>
+    /// UTF-32.
+    /// </summary>
+    UTF32,
 
-        ASCII
-    }
+    /// <summary>
+    /// ASCII.
+    /// </summary>
+    ASCII
 }

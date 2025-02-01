@@ -7,6 +7,11 @@ build/
 reports/
 out/
 site/
+server/
+node_modules/
+.vscode-test/
+.cache/
+*.vsix
 *.user
 src/**/*-help.xml
 src/**/*.help.txt
@@ -14,3 +19,4 @@ BenchmarkDotNet.Artifacts/
 .sonarqube/
 TestResults/
 *.diagsession
+**/.DS_Store

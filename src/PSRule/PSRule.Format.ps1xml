@@ -7,7 +7,7 @@
         <CustomEntries>
           <CustomEntry>
               <CustomItem>
-                <Text AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Name"/>
+                <Text AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Name"/>
                 <NewLine />
                 <Frame>
                   <LeftIndent>4</LeftIndent>
@@ -29,7 +29,7 @@
         <CustomEntries>
           <CustomEntry>
               <CustomItem>
-                <Text AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.DocumentStrings" ResourceId="DisplayName"/>
+                <Text AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.DocumentStrings" ResourceId="DisplayName"/>
                 <NewLine />
                 <Frame>
                   <LeftIndent>4</LeftIndent>
@@ -51,7 +51,7 @@
         <CustomEntries>
           <CustomEntry>
               <CustomItem>
-                <Text AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Synopsis"/>
+                <Text AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Synopsis"/>
                 <NewLine />
                 <Frame>
                   <LeftIndent>4</LeftIndent>
@@ -73,7 +73,7 @@
         <CustomEntries>
           <CustomEntry>
               <CustomItem>
-                <Text AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Description"/>
+                <Text AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Description"/>
                 <NewLine />
                 <Frame>
                   <LeftIndent>4</LeftIndent>
@@ -95,7 +95,7 @@
         <CustomEntries>
           <CustomEntry>
               <CustomItem>
-                <Text AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Recommendation"/>
+                <Text AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Recommendation"/>
                 <NewLine />
                 <Frame>
                   <LeftIndent>4</LeftIndent>
@@ -117,7 +117,7 @@
         <CustomEntries>
           <CustomEntry>
               <CustomItem>
-                <Text AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Notes"/>
+                <Text AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Notes"/>
                 <NewLine />
                 <Frame>
                   <LeftIndent>4</LeftIndent>
@@ -139,7 +139,7 @@
         <CustomEntries>
           <CustomEntry>
               <CustomItem>
-                <Text AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Links"/>
+                <Text AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.DocumentStrings" ResourceId="Links"/>
                 <NewLine />
                 <Frame>
                   <LeftIndent>4</LeftIndent>
@@ -161,7 +161,7 @@
         <CustomEntries>
           <CustomEntry>
               <CustomItem>
-                <Text AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="OptionsComment"/>
+                <Text AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="OptionsComment"/>
                 <NewLine />
                 <Frame>
                   <CustomItem>
@@ -185,22 +185,22 @@
       <TableControl>
         <TableHeaders>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="RuleName"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="RuleName"/>
             <Width>35</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="ModuleName"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="ModuleName"/>
             <Width>26</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Synopsis"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Synopsis"/>
           </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>
           <TableRowEntry>
             <TableColumnItems>
               <TableColumnItem>
-              <PropertyName>RuleName</PropertyName>
+              <PropertyName>Name</PropertyName>
               </TableColumnItem>
               <TableColumnItem>
                 <PropertyName>Source.Module</PropertyName>
@@ -221,18 +221,18 @@
       <TableControl>
         <TableHeaders>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="RuleName"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="RuleName"/>
             <Width>35</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="ModuleName"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="ModuleName"/>
             <Width>26</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Synopsis"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Synopsis"/>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Tag"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Tag"/>
           </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>
@@ -240,7 +240,7 @@
             <Wrap/>
             <TableColumnItems>
               <TableColumnItem>
-                <PropertyName>RuleName</PropertyName>
+                <PropertyName>Name</PropertyName>
               </TableColumnItem>
               <TableColumnItem>
                 <PropertyName>Source.Module</PropertyName>
@@ -267,22 +267,22 @@
       <TableControl>
         <TableHeaders>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="RuleName"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="RuleName"/>
             <Width>35</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Outcome"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Outcome"/>
             <Width>10</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Recommendation"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Recommendation"/>
           </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>
           <TableRowEntry>
             <TableColumnItems>
               <TableColumnItem>
-                <PropertyName>RuleName</PropertyName>
+                <PropertyName>Name</PropertyName>
               </TableColumnItem>
               <TableColumnItem>
                 <PropertyName>Outcome</PropertyName>
@@ -306,19 +306,19 @@
       <TableControl>
         <TableHeaders>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="RuleName"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="RuleName"/>
             <Width>35</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Outcome"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Outcome"/>
             <Width>10</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Reason"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Reason"/>
             <Width>35</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Recommendation"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Recommendation"/>
           </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>
@@ -326,7 +326,7 @@
             <Wrap/>
             <TableColumnItems>
               <TableColumnItem>
-                <PropertyName>RuleName</PropertyName>
+                <PropertyName>Name</PropertyName>
               </TableColumnItem>
               <TableColumnItem>
                 <PropertyName>Outcome</PropertyName>
@@ -350,26 +350,26 @@
       <TableControl>
         <TableHeaders>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="RuleName"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="RuleName"/>
             <Width>35</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Pass"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Pass"/>
             <Width>5</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Fail"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Fail"/>
             <Width>5</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Outcome"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Outcome"/>
           </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>
           <TableRowEntry>
             <TableColumnItems>
               <TableColumnItem>
-              <PropertyName>RuleName</PropertyName>
+              <PropertyName>Name</PropertyName>
               </TableColumnItem>
               <TableColumnItem>
                 <PropertyName>Pass</PropertyName>
@@ -507,15 +507,15 @@
       <TableControl>
         <TableHeaders>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Name"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Name"/>
             <Width>35</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="ModuleName"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="ModuleName"/>
             <Width>24</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Synopsis"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Synopsis"/>
           </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>
@@ -525,7 +525,7 @@
               <PropertyName>Name</PropertyName>
               </TableColumnItem>
               <TableColumnItem>
-                <PropertyName>ModuleName</PropertyName>
+                <PropertyName>Module</PropertyName>
               </TableColumnItem>
               <TableColumnItem>
                 <PropertyName>Synopsis</PropertyName>
@@ -560,15 +560,15 @@
       <TableControl>
         <TableHeaders>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Name"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Name"/>
             <Width>35</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Module"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Module"/>
             <Width>26</Width>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label AssemblyName="Microsoft.PSRule" BaseName="PSRule.Resources.ViewStrings" ResourceId="Synopsis"/>
+            <Label AssemblyName="Microsoft.PSRule.Core" BaseName="PSRule.Resources.ViewStrings" ResourceId="Synopsis"/>
           </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>
@@ -578,7 +578,7 @@
               <PropertyName>Name</PropertyName>
               </TableColumnItem>
               <TableColumnItem>
-                <PropertyName>Source.Module</PropertyName>
+                <PropertyName>Module</PropertyName>
               </TableColumnItem>
               <TableColumnItem>
                 <PropertyName>Synopsis</PropertyName>

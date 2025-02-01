@@ -1,90 +1,104 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System.Management.Automation;
+using PSRule.Definitions;
 
-namespace PSRule.Pipeline
+namespace PSRule.Pipeline;
+
+#nullable enable
+
+/// <summary>
+/// A base class for custom host context instances.
+/// </summary>
+public abstract class HostContext : IHostContext
 {
-    public interface IHostContext
-    {
-        ActionPreference GetPreferenceVariable(string variableName);
+    private const string ErrorPreference = "ErrorActionPreference";
+    private const string WarningPreference = "WarningPreference";
 
-        T GetVariable<T>(string variableName);
+    /// <inheritdoc/>
+    public virtual bool InSession => false;
+
+    /// <inheritdoc/>
+    public virtual bool HadErrors { get; protected set; }
+
+    /// <inheritdoc/>
+    public virtual void Debug(string text)
+    {
+
     }
 
-    internal static class HostContextExtensions
+    /// <inheritdoc/>
+    public virtual void Error(ErrorRecord errorRecord)
     {
-        private const string ErrorPreference = "ErrorActionPreference";
-        private const string WarningPreference = "WarningPreference";
-        private const string InformationPreference = "InformationPreference";
-        private const string VerbosePreference = "VerbosePreference";
-        private const string DebugPreference = "DebugPreference";
-        private const string AutoLoadingPreference = "PSModuleAutoLoadingPreference";
-
-        public static ActionPreference GetErrorPreference(this IHostContext hostContext)
-        {
-            return hostContext.GetPreferenceVariable(ErrorPreference);
-        }
-
-        public static ActionPreference GetWarningPreference(this IHostContext hostContext)
-        {
-            return hostContext.GetPreferenceVariable(WarningPreference);
-        }
-
-        public static ActionPreference GetInformationPreference(this IHostContext hostContext)
-        {
-            return hostContext.GetPreferenceVariable(InformationPreference);
-        }
-
-        public static ActionPreference GetVerbosePreference(this IHostContext hostContext)
-        {
-            return hostContext.GetPreferenceVariable(VerbosePreference);
-        }
-
-        public static ActionPreference GetDebugPreference(this IHostContext hostContext)
-        {
-            return hostContext.GetPreferenceVariable(DebugPreference);
-        }
-
-        public static PSModuleAutoLoadingPreference GetAutoLoadingPreference(this IHostContext hostContext)
-        {
-            return hostContext.GetVariable<PSModuleAutoLoadingPreference>(AutoLoadingPreference);
-        }
+        HadErrors = true;
     }
 
-    internal sealed class HostContext : IHostContext
+    /// <inheritdoc/>
+    public virtual ActionPreference GetPreferenceVariable(string variableName)
     {
-        internal readonly PSCmdlet CmdletContext;
-        internal readonly EngineIntrinsics ExecutionContext;
-
-        /// <summary>
-        /// Determine if running is remote session.
-        /// </summary>
-        internal bool InSession;
-
-        public HostContext(PSCmdlet commandRuntime, EngineIntrinsics executionContext)
-        {
-            InSession = false;
-            CmdletContext = commandRuntime;
-            ExecutionContext = executionContext;
-            InSession = executionContext != null && executionContext.SessionState.PSVariable.GetValue("PSSenderInfo") != null;
-        }
-
-        public ActionPreference GetPreferenceVariable(string variableName)
-        {
-            return ExecutionContext == null
-                ? ActionPreference.SilentlyContinue
-                : (ActionPreference)ExecutionContext.SessionState.PSVariable.GetValue(variableName);
-        }
-
-        public T GetVariable<T>(string variableName)
-        {
-            return ExecutionContext == null ? default : (T)ExecutionContext.SessionState.PSVariable.GetValue(variableName);
-        }
-
-        public bool ShouldProcess(string target, string action)
-        {
-            return CmdletContext == null || CmdletContext.ShouldProcess(target, action);
-        }
+        return variableName == ErrorPreference ||
+            variableName == WarningPreference ? ActionPreference.Continue : ActionPreference.Ignore;
     }
+
+    /// <inheritdoc/>
+    public virtual T? GetVariable<T>(string variableName)
+    {
+        return default;
+    }
+
+    /// <inheritdoc/>
+    public virtual void Information(InformationRecord informationRecord)
+    {
+
+    }
+
+    /// <inheritdoc/>
+    public virtual void Object(object sendToPipeline, bool enumerateCollection)
+    {
+        if (sendToPipeline is IResultRecord record)
+            Record(record);
+        //else if (enumerateCollection)
+        //    foreach (var item in record)
+    }
+
+    /// <inheritdoc/>
+    public virtual void SetVariable<T>(string variableName, T value)
+    {
+
+    }
+
+    /// <inheritdoc/>
+    public abstract bool ShouldProcess(string target, string action);
+
+    /// <inheritdoc/>
+    public virtual void Verbose(string text)
+    {
+
+    }
+
+    /// <inheritdoc/>
+    public virtual void Warning(string text)
+    {
+
+    }
+
+    /// <summary>
+    /// Handle record objects emitted from the pipeline.
+    /// </summary>
+    public virtual void Record(IResultRecord record)
+    {
+
+    }
+
+    /// <inheritdoc/>
+    public virtual string GetWorkingPath()
+    {
+        return Directory.GetCurrentDirectory();
+    }
+
+    /// <inheritdoc/>
+    public virtual string? CachePath => null;
 }
+
+#nullable restore

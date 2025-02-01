@@ -8,7 +8,7 @@
 Set-StrictMode -Version latest;
 
 [PSRule.Configuration.PSRuleOption]::UseExecutionContext($ExecutionContext);
-[PSRule.Configuration.PSRuleOption]::UseCurrentCulture();
+[PSRule.Environment]::UseCurrentCulture();
 
 #
 # Localization
@@ -47,8 +47,8 @@ function Invoke-PSRule {
         [PSRule.Configuration.ResultFormat]$As = [PSRule.Configuration.ResultFormat]::Detail,
 
         [Parameter(Mandatory = $False)]
-        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData', 'File', 'Detect')]
-        [PSRule.Configuration.InputFormat]$Format = [PSRule.Configuration.InputFormat]::Detect,
+        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData')]
+        [PSRule.Options.InputFormat]$Format = [PSRule.Options.InputFormat]::None,
 
         [Parameter(Mandatory = $False)]
         [String]$OutputPath,
@@ -106,7 +106,7 @@ function Invoke-PSRule {
         }
 
         # Get an options object
-        $Option = New-PSRuleOption @optionParams;
+        $Option = New-PSRuleOption @optionParams -WarningAction SilentlyContinue;
 
         # Discover scripts in the specified paths
         $sourceParams = @{ };
@@ -125,7 +125,7 @@ function Invoke-PSRule {
 
         # If DeviceGuard is enabled, force a contrained execution environment
         if ($isDeviceGuard) {
-            $Option.Execution.LanguageMode = [PSRule.Configuration.LanguageMode]::ConstrainedLanguage;
+            $Option.Execution.LanguageMode = [PSRule.Options.LanguageMode]::ConstrainedLanguage;
         }
         if ($PSBoundParameters.ContainsKey('Format')) {
             $Option.Input.Format = $Format;
@@ -152,11 +152,12 @@ function Invoke-PSRule {
             $Option.Output.Culture = $Culture;
         }
 
-        $builder = [PSRule.Pipeline.PipelineBuilder]::Invoke($sourceFiles, $Option, $PSCmdlet, $ExecutionContext);
+        $hostContext = [PSRule.Pipeline.PSHostContext]::new($PSCmdlet, $ExecutionContext);
+        $builder = [PSRule.Pipeline.PipelineBuilder]::Invoke($sourceFiles, $Option, $hostContext);
         $builder.Name($Name);
         $builder.Tag($Tag);
         $builder.Convention($Convention);
-        $builder.UseBaseline($Baseline);
+        $builder.Baseline($Baseline);
 
         if ($PSBoundParameters.ContainsKey('InputPath')) {
             $builder.InputPath($InputPath);
@@ -215,8 +216,8 @@ function Test-PSRuleTarget {
         [PSRule.Rules.RuleOutcome]$Outcome = [PSRule.Rules.RuleOutcome]::Processed,
 
         [Parameter(Mandatory = $False)]
-        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData', 'File', 'Detect')]
-        [PSRule.Configuration.InputFormat]$Format,
+        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData')]
+        [PSRule.Options.InputFormat]$Format,
 
         [Parameter(Mandatory = $False)]
         [String[]]$Convention,
@@ -263,7 +264,7 @@ function Test-PSRuleTarget {
         }
 
         # Get an options object
-        $Option = New-PSRuleOption @optionParams;
+        $Option = New-PSRuleOption @optionParams -WarningAction SilentlyContinue;
 
         # Discover scripts in the specified paths
         $sourceParams = @{ };
@@ -282,7 +283,7 @@ function Test-PSRuleTarget {
 
         # If DeviceGuard is enabled, force a contrained execution environment
         if ($isDeviceGuard) {
-            $Option.Execution.LanguageMode = [PSRule.Configuration.LanguageMode]::ConstrainedLanguage;
+            $Option.Execution.LanguageMode = [PSRule.Options.LanguageMode]::ConstrainedLanguage;
         }
         if ($PSBoundParameters.ContainsKey('Format')) {
             $Option.Input.Format = $Format;
@@ -300,7 +301,8 @@ function Test-PSRuleTarget {
             $Option.Output.Culture = $Culture;
         }
 
-        $builder = [PSRule.Pipeline.PipelineBuilder]::Test($sourceFiles, $Option, $PSCmdlet, $ExecutionContext);
+        $hostContext = [PSRule.Pipeline.PSHostContext]::new($PSCmdlet, $ExecutionContext);
+        $builder = [PSRule.Pipeline.PipelineBuilder]::Test($sourceFiles, $Option, $hostContext);
         $builder.Name($Name);
         $builder.Tag($Tag);
         $builder.Convention($Convention);
@@ -356,8 +358,8 @@ function Get-PSRuleTarget {
         [String[]]$InputPath,
 
         [Parameter(Mandatory = $False)]
-        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData', 'File', 'Detect')]
-        [PSRule.Configuration.InputFormat]$Format = [PSRule.Configuration.InputFormat]::Detect,
+        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData')]
+        [PSRule.Options.InputFormat]$Format = [PSRule.Options.InputFormat]::None,
 
         [Parameter(Mandatory = $False)]
         [PSRule.Configuration.PSRuleOption]$Option,
@@ -381,13 +383,13 @@ function Get-PSRuleTarget {
         }
 
         # Get an options object
-        $Option = New-PSRuleOption @optionParams;
+        $Option = New-PSRuleOption @optionParams -WarningAction SilentlyContinue;
 
         $isDeviceGuard = IsDeviceGuardEnabled;
 
         # If DeviceGuard is enabled, force a contrained execution environment
         if ($isDeviceGuard) {
-            $Option.Execution.LanguageMode = [PSRule.Configuration.LanguageMode]::ConstrainedLanguage;
+            $Option.Execution.LanguageMode = [PSRule.Options.LanguageMode]::ConstrainedLanguage;
         }
         if ($PSBoundParameters.ContainsKey('Format')) {
             $Option.Input.Format = $Format;
@@ -405,7 +407,8 @@ function Get-PSRuleTarget {
             $Option.Output.Path = $OutputPath;
         }
 
-        $builder = [PSRule.Pipeline.PipelineBuilder]::GetTarget($Option, $PSCmdlet, $ExecutionContext);
+        $hostContext = [PSRule.Pipeline.PSHostContext]::new($PSCmdlet, $ExecutionContext);
+        $builder = [PSRule.Pipeline.PipelineBuilder]::GetTarget($Option, $hostContext);
 
         if ($PSBoundParameters.ContainsKey('InputPath')) {
             $builder.InputPath($InputPath);
@@ -462,8 +465,8 @@ function Assert-PSRule {
         [String[]]$Module,
 
         [Parameter(Mandatory = $False)]
-        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData', 'File', 'Detect')]
-        [PSRule.Configuration.InputFormat]$Format = [PSRule.Configuration.InputFormat]::Detect,
+        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData')]
+        [PSRule.Options.InputFormat]$Format = [PSRule.Options.InputFormat]::None,
 
         [Parameter(Mandatory = $False)]
         [PSRule.Configuration.BaselineOption]$Baseline,
@@ -534,7 +537,7 @@ function Assert-PSRule {
         }
 
         # Get an options object
-        $Option = New-PSRuleOption @optionParams;
+        $Option = New-PSRuleOption @optionParams -WarningAction SilentlyContinue;
 
         # Discover scripts in the specified paths
         $sourceParams = @{ };
@@ -553,7 +556,7 @@ function Assert-PSRule {
 
         # If DeviceGuard is enabled, force a contrained execution environment
         if ($isDeviceGuard) {
-            $Option.Execution.LanguageMode = [PSRule.Configuration.LanguageMode]::ConstrainedLanguage;
+            $Option.Execution.LanguageMode = [PSRule.Options.LanguageMode]::ConstrainedLanguage;
         }
         if ($PSBoundParameters.ContainsKey('Format')) {
             $Option.Input.Format = $Format;
@@ -583,11 +586,12 @@ function Assert-PSRule {
             $Option.Output.Culture = $Culture;
         }
 
-        $builder = [PSRule.Pipeline.PipelineBuilder]::Assert($sourceFiles, $Option, $PSCmdlet, $ExecutionContext);;
+        $hostContext = [PSRule.Pipeline.PSHostContext]::new($PSCmdlet, $ExecutionContext);
+        $builder = [PSRule.Pipeline.PipelineBuilder]::Assert($sourceFiles, $Option, $hostContext);;
         $builder.Name($Name);
         $builder.Tag($Tag);
         $builder.Convention($Convention);
-        $builder.UseBaseline($Baseline);
+        $builder.Baseline($Baseline);
         $builder.ResultVariable($ResultVariable);
 
         if ($PSBoundParameters.ContainsKey('InputPath')) {
@@ -684,7 +688,7 @@ function Get-PSRule {
         }
 
         # Get an options object
-        $Option = New-PSRuleOption @optionParams;
+        $Option = New-PSRuleOption @optionParams -WarningAction SilentlyContinue;
 
         # Discover scripts in the specified paths
         $sourceParams = @{ };
@@ -704,7 +708,7 @@ function Get-PSRule {
 
         # Check that some matching script files were found
         if ($Null -eq $sourceFiles) {
-            Write-Verbose -Message "[Get-PSRule] -- Could not find any .Rule.ps1 script files in the path";
+            Write-Verbose -Message "[Get-PSRule] -- Could not find any .Rule.ps1 script files in the path.";
             return; # continue causes issues with Pester
         }
 
@@ -714,7 +718,7 @@ function Get-PSRule {
 
         # If DeviceGuard is enabled, force a contrained execution environment
         if ($isDeviceGuard) {
-            $Option.Execution.LanguageMode = [PSRule.Configuration.LanguageMode]::ConstrainedLanguage;
+            $Option.Execution.LanguageMode = [PSRule.Options.LanguageMode]::ConstrainedLanguage;
         }
         if ($PSBoundParameters.ContainsKey('OutputFormat')) {
             $Option.Output.Format = $OutputFormat;
@@ -723,17 +727,16 @@ function Get-PSRule {
             $Option.Output.Culture = $Culture;
         }
 
-        $builder = [PSRule.Pipeline.PipelineBuilder]::Get($sourceFiles, $Option, $PSCmdlet, $ExecutionContext);
+        $hostContext = [PSRule.Pipeline.PSHostContext]::new($PSCmdlet, $ExecutionContext);
+        $builder = [PSRule.Pipeline.PipelineBuilder]::Get($sourceFiles, $Option, $hostContext);
         $builder.Name($Name);
         $builder.Tag($Tag);
-        $builder.UseBaseline($Baseline);
+        $builder.Baseline($Baseline);
 
         if ($IncludeDependencies) {
             $builder.IncludeDependencies();
         }
 
-        # $builder.UseCommandRuntime($PSCmdlet);
-        # $builder.UseExecutionContext($ExecutionContext);
         try {
             $pipeline = $builder.Build();
             if ($Null -ne $pipeline) {
@@ -803,7 +806,7 @@ function Get-PSRuleBaseline {
         }
 
         # Get an options object
-        $Option = New-PSRuleOption @optionParams;
+        $Option = New-PSRuleOption @optionParams -WarningAction SilentlyContinue;
 
         # Discover scripts in the specified paths
         $sourceParams = @{ };
@@ -823,7 +826,7 @@ function Get-PSRuleBaseline {
 
         # Check that some matching script files were found
         if ($Null -eq $sourceFiles) {
-            Write-Verbose -Message "[Get-PSRuleBaseline] -- Could not find any .Rule.ps1 script files in the path";
+            Write-Verbose -Message "[Get-PSRuleBaseline] -- Could not find any .Rule.ps1 script files in the path.";
             return; # continue causes issues with Pester
         }
 
@@ -835,7 +838,8 @@ function Get-PSRuleBaseline {
             $Option.Output.Format = $OutputFormat;
         }
 
-        $builder = [PSRule.Pipeline.PipelineBuilder]::GetBaseline($sourceFiles, $Option, $PSCmdlet, $ExecutionContext);;
+        $hostContext = [PSRule.Pipeline.PSHostContext]::new($PSCmdlet, $ExecutionContext);
+        $builder = [PSRule.Pipeline.PipelineBuilder]::GetBaseline($sourceFiles, $Option, $hostContext);;
         $builder.Name($Name);
         try {
             $pipeline = $builder.Build();
@@ -910,7 +914,7 @@ function Export-PSRuleBaseline {
         }
 
         # Get an options object
-        $Option = New-PSRuleOption @optionParams;
+        $Option = New-PSRuleOption @optionParams -WarningAction SilentlyContinue;
 
         # Discover scripts in the specified paths
         $sourceParams = @{ };
@@ -929,7 +933,7 @@ function Export-PSRuleBaseline {
 
         # Check that some matching script files were found
         if ($Null -eq $sourceFiles) {
-            Write-Verbose -Message "[Export-PSRuleBaseline] -- Could not find any .Rule.ps1 script files in the path";
+            Write-Verbose -Message "[Export-PSRuleBaseline] -- Could not find any .Rule.ps1 script files in the path.";
             return; # continue causes issues with Pester
         }
 
@@ -944,7 +948,8 @@ function Export-PSRuleBaseline {
             $Option.Output.Encoding = $OutputEncoding;
         }
 
-        $builder = [PSRule.Pipeline.PipelineBuilder]::ExportBaseline($sourceFiles, $Option, $PSCmdlet, $ExecutionContext);;
+        $hostContext = [PSRule.Pipeline.PSHostContext]::new($PSCmdlet, $ExecutionContext);
+        $builder = [PSRule.Pipeline.PipelineBuilder]::ExportBaseline($sourceFiles, $Option, $hostContext);;
         $builder.Name($Name);
         try {
             $pipeline = $builder.Build();
@@ -989,7 +994,7 @@ function Get-PSRuleHelp {
         [Parameter(Position = 0, Mandatory = $False)]
         [Alias('n')]
         [SupportsWildcards()]
-        [String]$Name,
+        [String[]]$Name,
 
         # A path to check documentation for.
         [Parameter(Mandatory = $False)]
@@ -1015,7 +1020,7 @@ function Get-PSRuleHelp {
         }
 
         # Get an options object
-        $Option = New-PSRuleOption @optionParams;
+        $Option = New-PSRuleOption @optionParams -WarningAction SilentlyContinue;
 
         # Discover scripts in the specified paths
         $sourceParams = @{ };
@@ -1036,7 +1041,7 @@ function Get-PSRuleHelp {
 
         # Check that some matching script files were found
         if ($Null -eq $sourceFiles) {
-            Write-Verbose -Message "[Get-PSRuleHelp] -- Could not find any .Rule.ps1 script files in the path";
+            Write-Verbose -Message "[Get-PSRuleHelp] -- Could not find any .Rule.ps1 script files in the path.";
             return; # continue causes issues with Pester
         }
 
@@ -1046,17 +1051,15 @@ function Get-PSRuleHelp {
 
         # If DeviceGuard is enabled, force a contrained execution environment
         if ($isDeviceGuard) {
-            $Option.Execution.LanguageMode = [PSRule.Configuration.LanguageMode]::ConstrainedLanguage;
-        }
-        if ($PSBoundParameters.ContainsKey('Name')) {
-            $Option.Rule.Include = $Name;
+            $Option.Execution.LanguageMode = [PSRule.Options.LanguageMode]::ConstrainedLanguage;
         }
         if ($PSBoundParameters.ContainsKey('Culture')) {
             $Option.Output.Culture = $Culture;
         }
 
-        $builder = [PSRule.Pipeline.PipelineBuilder]::GetHelp($sourceFiles, $Option, $PSCmdlet, $ExecutionContext);;
-
+        $hostContext = [PSRule.Pipeline.PSHostContext]::new($PSCmdlet, $ExecutionContext);
+        $builder = [PSRule.Pipeline.PipelineBuilder]::GetHelp($sourceFiles, $Option, $hostContext);
+        $builder.Name($Name);
         if ($Online) {
             $builder.Online();
         }
@@ -1113,13 +1116,11 @@ function New-PSRuleOption {
         [Parameter(Mandatory = $False)]
         [PSRule.Configuration.SuppressionOption]$SuppressTargetName,
 
-        [Parameter(Mandatory = $False)]
-        [PSRule.Configuration.BindTargetName[]]$BindTargetName,
-
-        [Parameter(Mandatory = $False)]
-        [PSRule.Configuration.BindTargetName[]]$BindTargetType,
-
         # Options
+
+        # Sets the Baseline.Group option
+        [Parameter(Mandatory = $False)]
+        [Hashtable]$BaselineGroup,
 
         # Sets the Binding.IgnoreCase option
         [Parameter(Mandatory = $False)]
@@ -1156,30 +1157,53 @@ function New-PSRuleOption {
         [Alias('ConventionInclude')]
         [String[]]$Convention,
 
-        # Sets the Execution.InconclusiveWarning option
+        # Sets the Execution.Break option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionInconclusiveWarning')]
-        [System.Boolean]$InconclusiveWarning = $True,
+        [PSRule.Options.BreakLevel]$ExecutionBreak = [PSRule.Options.BreakLevel]::OnError,
 
-        # Sets the Execution.NotProcessedWarning option
+        # Sets the Execution.DuplicateResourceId option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionNotProcessedWarning')]
-        [System.Boolean]$NotProcessedWarning = $True,
+        [Alias('ExecutionDuplicateResourceId')]
+        [PSRule.Options.ExecutionActionPreference]$DuplicateResourceId = [PSRule.Options.ExecutionActionPreference]::Error,
 
-        # Sets the Execution.SuppressedRuleWarning option
+        # Sets the Execution.InitialSessionState option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionSuppressedRuleWarning')]
-        [System.Boolean]$SuppressedRuleWarning = $True,
+        [Alias('ExecutionInitialSessionState')]
+        [PSRule.Options.SessionState]$InitialSessionState = [PSRule.Options.SessionState]::BuiltIn,
 
-        # Sets the Execution.AliasReferenceWarning option
+        # Sets the Execution.RestrictScriptSource option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionAliasReferenceWarning')]
-        [System.Boolean]$AliasReferenceWarning = $True,
+        [Alias('ExecutionRestrictScriptSource')]
+        [PSRule.Options.RestrictScriptSource]$RestrictScriptSource = [PSRule.Options.RestrictScriptSource]::Unrestricted,
 
-        # Sets the Execution.InvariantCultureWarning option
+        # Sets the Execution.SuppressionGroupExpired option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionInvariantCultureWarning')]
-        [System.Boolean]$InvariantCultureWarning = $True,
+        [Alias('ExecutionSuppressionGroupExpired')]
+        [PSRule.Options.ExecutionActionPreference]$SuppressionGroupExpired = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.RuleExcluded option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionRuleExcluded = [PSRule.Options.ExecutionActionPreference]::Ignore,
+
+        # Sets the Execution.RuleSuppressed option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionRuleSuppressed = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.AliasReference option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionAliasReference = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.RuleInconclusive option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionRuleInconclusive = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.InvariantCulture option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionInvariantCulture = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.UnprocessedObject option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionUnprocessedObject = [PSRule.Options.ExecutionActionPreference]::Warn,
 
         # Sets the Include.Module option
         [Parameter(Mandatory = $False)]
@@ -1189,11 +1213,15 @@ function New-PSRuleOption {
         [Parameter(Mandatory = $False)]
         [String[]]$IncludePath,
 
+        # Sets the Input.FileObjects option
+        [Parameter(Mandatory = $False)]
+        [System.Boolean]$InputFileObjects = $False,
+
         # Sets the Input.Format option
         [Parameter(Mandatory = $False)]
-        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData', 'Detect')]
+        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData')]
         [Alias('InputFormat')]
-        [PSRule.Configuration.InputFormat]$Format = 'Detect',
+        [PSRule.Options.InputFormat]$Format = 'None',
 
         # Sets the Input.IgnoreGitPath option
         [Parameter(Mandatory = $False)]
@@ -1202,6 +1230,14 @@ function New-PSRuleOption {
         # Sets the Input.IgnoreRepositoryCommon option
         [Parameter(Mandatory = $False)]
         [System.Boolean]$InputIgnoreRepositoryCommon = $True,
+
+        # Sets the Input.IgnoreObjectSource option
+        [Parameter(Mandatory = $False)]
+        [System.Boolean]$InputIgnoreObjectSource = $False,
+
+        # Sets the Input.IgnoreUnchangedPath option
+        [Parameter(Mandatory = $False)]
+        [System.Boolean]$InputIgnoreUnchangedPath = $False,
 
         # Sets the Input.ObjectPath option
         [Parameter(Mandatory = $False)]
@@ -1261,9 +1297,19 @@ function New-PSRuleOption {
         [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'NUnit3', 'Csv', 'Wide', 'Sarif')]
         [PSRule.Configuration.OutputFormat]$OutputFormat = 'None',
 
+        # Sets the Output.JobSummaryPath option
+        [Parameter(Mandatory = $False)]
+        [String]$OutputJobSummaryPath = '',
+
+        # Sets the Output.JsonIndent option
+        [Parameter(Mandatory = $False)]
+        [ValidateRange(0, 4)]
+        [Alias('JsonIndent')]
+        [int]$OutputJsonIndent = 0,
+
         # Sets the Output.Outcome option
         [Parameter(Mandatory = $False)]
-        [ValidateSet('None', 'Fail', 'Pass', 'Error', 'Processed', 'All')]
+        [ValidateSet('None', 'Fail', 'Pass', 'Error', 'Problem', 'Processed', 'All')]
         [Alias('Outcome')]
         [PSRule.Rules.RuleOutcome]$OutputOutcome = 'Processed',
 
@@ -1280,11 +1326,13 @@ function New-PSRuleOption {
         [ValidateSet('Client', 'Plain', 'AzurePipelines', 'GitHubActions', 'VisualStudioCode', 'Detect')]
         [PSRule.Configuration.OutputStyle]$OutputStyle = [PSRule.Configuration.OutputStyle]::Detect,
 
-        # Sets the Output.JsonIndent option
+        # Sets the OverrideLevel option
         [Parameter(Mandatory = $False)]
-        [ValidateRange(0, 4)]
-        [Alias('JsonIndent')]
-        [int]$OutputJsonIndent = 0,
+        [Hashtable]$OverrideLevel,
+
+        # Sets the Repository.BaseRef option
+        [Parameter(Mandatory = $False)]
+        [String]$RepositoryBaseRef,
 
         # Sets the Repository.Url option
         [Parameter(Mandatory = $False)]
@@ -1321,12 +1369,6 @@ function New-PSRuleOption {
         if ($optionParams.ContainsKey('SuppressTargetName')) {
             $optionParams.Remove('SuppressTargetName');
         }
-        if ($optionParams.ContainsKey('BindTargetName')) {
-            $optionParams.Remove('BindTargetName');
-        }
-        if ($optionParams.ContainsKey('BindTargetType')) {
-            $optionParams.Remove('BindTargetType');
-        }
         if ($PSBoundParameters.ContainsKey('Option')) {
             $Option = [PSRule.Configuration.PSRuleOption]::FromFileOrEmpty($Option, $Path);
         }
@@ -1349,14 +1391,6 @@ function New-PSRuleOption {
         }
         if ($PSBoundParameters.ContainsKey('SuppressTargetName')) {
             $Option.Suppression = $SuppressTargetName;
-        }
-        if ($PSBoundParameters.ContainsKey('BindTargetName')) {
-            Write-Verbose -Message 'Set BindTargetName pipeline hook';
-            $Option.Pipeline.BindTargetName.AddRange($BindTargetName);
-        }
-        if ($PSBoundParameters.ContainsKey('BindTargetType')) {
-            Write-Verbose -Message 'Set BindTargetType pipeline hook';
-            $Option.Pipeline.BindTargetType.AddRange($BindTargetType);
         }
 
         # Options
@@ -1390,6 +1424,10 @@ function Set-PSRuleOption {
         [Switch]$AllowClobber = $False,
 
         # Options
+
+        # Sets the Baseline.Group option
+        [Parameter(Mandatory = $False)]
+        [Hashtable]$BaselineGroup,
 
         # Sets the Binding.IgnoreCase option
         [Parameter(Mandatory = $False)]
@@ -1426,30 +1464,53 @@ function Set-PSRuleOption {
         [Alias('ConventionInclude')]
         [String[]]$Convention,
 
-        # Sets the Execution.InconclusiveWarning option
+        # Sets the Execution.Break option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionInconclusiveWarning')]
-        [System.Boolean]$InconclusiveWarning = $True,
+        [PSRule.Options.BreakLevel]$ExecutionBreak = [PSRule.Options.BreakLevel]::OnError,
 
-        # Sets the Execution.NotProcessedWarning option
+        # Sets the Execution.DuplicateResourceId option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionNotProcessedWarning')]
-        [System.Boolean]$NotProcessedWarning = $True,
+        [Alias('ExecutionDuplicateResourceId')]
+        [PSRule.Options.ExecutionActionPreference]$DuplicateResourceId = [PSRule.Options.ExecutionActionPreference]::Error,
 
-        # Sets the Execution.SuppressedRuleWarning option
+        # Sets the Execution.InitialSessionState option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionSuppressedRuleWarning')]
-        [System.Boolean]$SuppressedRuleWarning = $True,
+        [Alias('ExecutionInitialSessionState')]
+        [PSRule.Options.SessionState]$InitialSessionState = [PSRule.Options.SessionState]::BuiltIn,
 
-        # Sets the Execution.AliasReferenceWarning option
+        # Sets the Execution.RestrictScriptSource option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionAliasReferenceWarning')]
-        [System.Boolean]$AliasReferenceWarning = $True,
+        [Alias('ExecutionRestrictScriptSource')]
+        [PSRule.Options.RestrictScriptSource]$RestrictScriptSource = [PSRule.Options.RestrictScriptSource]::Unrestricted,
 
-        # Sets the Execution.InvariantCultureWarning option
+        # Sets the Execution.SuppressionGroupExpired option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionInvariantCultureWarning')]
-        [System.Boolean]$InvariantCultureWarning = $True,
+        [Alias('ExecutionSuppressionGroupExpired')]
+        [PSRule.Options.ExecutionActionPreference]$SuppressionGroupExpired = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.RuleExcluded option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionRuleExcluded = [PSRule.Options.ExecutionActionPreference]::Ignore,
+
+        # Sets the Execution.RuleSuppressed option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionRuleSuppressed = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.AliasReference option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionAliasReference = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.RuleInconclusive option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionRuleInconclusive = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.InvariantCulture option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionInvariantCulture = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.UnprocessedObject option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionUnprocessedObject = [PSRule.Options.ExecutionActionPreference]::Warn,
 
         # Sets the Include.Module option
         [Parameter(Mandatory = $False)]
@@ -1459,19 +1520,31 @@ function Set-PSRuleOption {
         [Parameter(Mandatory = $False)]
         [String[]]$IncludePath,
 
+        # Sets the Input.FileObjects option
+        [Parameter(Mandatory = $False)]
+        [System.Boolean]$InputFileObjects = $False,
+
         # Sets the Input.Format option
         [Parameter(Mandatory = $False)]
-        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData', 'Detect')]
+        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData')]
         [Alias('InputFormat')]
-        [PSRule.Configuration.InputFormat]$Format = 'Detect',
+        [PSRule.Options.InputFormat]$Format = 'None',
 
         # Sets the Input.IgnoreGitPath option
         [Parameter(Mandatory = $False)]
         [System.Boolean]$InputIgnoreGitPath = $True,
 
+        # Sets the Input.IgnoreObjectSource option
+        [Parameter(Mandatory = $False)]
+        [System.Boolean]$InputIgnoreObjectSource = $False,
+
         # Sets the Input.IgnoreRepositoryCommon option
         [Parameter(Mandatory = $False)]
         [System.Boolean]$InputIgnoreRepositoryCommon = $True,
+
+        # Sets the Input.IgnoreUnchangedPath option
+        [Parameter(Mandatory = $False)]
+        [System.Boolean]$InputIgnoreUnchangedPath = $False,
 
         # Sets the Input.ObjectPath option
         [Parameter(Mandatory = $False)]
@@ -1531,9 +1604,19 @@ function Set-PSRuleOption {
         [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'NUnit3', 'Csv', 'Wide', 'Sarif')]
         [PSRule.Configuration.OutputFormat]$OutputFormat = 'None',
 
+        # Sets the Output.JobSummaryPath option
+        [Parameter(Mandatory = $False)]
+        [String]$OutputJobSummaryPath = '',
+
+        # Sets the Output.JsonIndent option
+        [Parameter(Mandatory = $False)]
+        [ValidateRange(0, 4)]
+        [Alias('JsonIndent')]
+        [int]$OutputJsonIndent = 0,
+
         # Sets the Output.Outcome option
         [Parameter(Mandatory = $False)]
-        [ValidateSet('None', 'Fail', 'Pass', 'Error', 'Processed', 'All')]
+        [ValidateSet('None', 'Fail', 'Pass', 'Error', 'Problem', 'Processed', 'All')]
         [Alias('Outcome')]
         [PSRule.Rules.RuleOutcome]$OutputOutcome = 'Processed',
 
@@ -1550,11 +1633,13 @@ function Set-PSRuleOption {
         [ValidateSet('Client', 'Plain', 'AzurePipelines', 'GitHubActions', 'VisualStudioCode', 'Detect')]
         [PSRule.Configuration.OutputStyle]$OutputStyle = [PSRule.Configuration.OutputStyle]::Detect,
 
-        # Sets the Output.JsonIndent option
+        # Sets the OverrideLevel option
         [Parameter(Mandatory = $False)]
-        [ValidateRange(0, 4)]
-        [Alias('JsonIndent')]
-        [Int]$OutputJsonIndent = 0,
+        [Hashtable]$OverrideLevel,
+
+        # Sets the Repository.BaseRef option
+        [Parameter(Mandatory = $False)]
+        [String]$RepositoryBaseRef,
 
         # Sets the Repository.Url option
         [Parameter(Mandatory = $False)]
@@ -1690,6 +1775,10 @@ function Rule {
 
         [Parameter(Mandatory = $False)]
         [Hashtable]$Tag,
+
+        # Any taxonomy references.
+        [Parameter(Mandatory = $False)]
+        [hashtable]$Labels,
 
         [Parameter(Mandatory = $False)]
         [ScriptBlock]$If,
@@ -1962,7 +2051,8 @@ function GetSource {
         [PSRule.Configuration.PSRuleOption]$Option
     )
     process {
-        $builder = [PSRule.Pipeline.PipelineBuilder]::RuleSource($Option, $PSCmdlet, $ExecutionContext);
+        $hostContext = [PSRule.Pipeline.PSHostContext]::new($PSCmdlet, $ExecutionContext);
+        $builder = [PSRule.Pipeline.PipelineBuilder]::RuleSource($Option, $hostContext);
 
         $moduleParams = @{};
         if ($PSBoundParameters.ContainsKey('Module')) {
@@ -2103,6 +2193,10 @@ function SetOptions {
 
         # Options
 
+        # Sets the Baseline.Group option
+        [Parameter(Mandatory = $False)]
+        [Hashtable]$BaselineGroup,
+
         # Sets the Binding.IgnoreCase option
         [Parameter(Mandatory = $False)]
         [System.Boolean]$BindingIgnoreCase = $True,
@@ -2138,30 +2232,53 @@ function SetOptions {
         [Alias('ConventionInclude')]
         [String[]]$Convention,
 
-        # Sets the Execution.InconclusiveWarning option
+        # Sets the Execution.Break option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionInconclusiveWarning')]
-        [System.Boolean]$InconclusiveWarning = $True,
+        [PSRule.Options.BreakLevel]$ExecutionBreak = [PSRule.Options.BreakLevel]::OnError,
 
-        # Sets the Execution.NotProcessedWarning option
+        # Sets the Execution.DuplicateResourceId option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionNotProcessedWarning')]
-        [System.Boolean]$NotProcessedWarning = $True,
+        [Alias('ExecutionDuplicateResourceId')]
+        [PSRule.Options.ExecutionActionPreference]$DuplicateResourceId = [PSRule.Options.ExecutionActionPreference]::Error,
 
-        # Sets the Execution.SuppressedRuleWarning option
+        # Sets the Execution.InitialSessionState option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionSuppressedRuleWarning')]
-        [System.Boolean]$SuppressedRuleWarning = $True,
+        [Alias('ExecutionInitialSessionState')]
+        [PSRule.Options.SessionState]$InitialSessionState = [PSRule.Options.SessionState]::BuiltIn,
 
-        # Sets the Execution.AliasReferenceWarning option
+        # Sets the Execution.RestrictScriptSource option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionAliasReferenceWarning')]
-        [System.Boolean]$AliasReferenceWarning = $True,
+        [Alias('ExecutionRestrictScriptSource')]
+        [PSRule.Options.RestrictScriptSource]$RestrictScriptSource = [PSRule.Options.RestrictScriptSource]::Unrestricted,
 
-        # Sets the Execution.InvariantCultureWarning option
+        # Sets the Execution.SuppressionGroupExpired option
         [Parameter(Mandatory = $False)]
-        [Alias('ExecutionInvariantCultureWarning')]
-        [System.Boolean]$InvariantCultureWarning = $True,
+        [Alias('ExecutionSuppressionGroupExpired')]
+        [PSRule.Options.ExecutionActionPreference]$SuppressionGroupExpired = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.RuleExcluded option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionRuleExcluded = [PSRule.Options.ExecutionActionPreference]::Ignore,
+
+        # Sets the Execution.RuleSuppressed option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionRuleSuppressed = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.AliasReference option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionAliasReference = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.RuleInconclusive option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionRuleInconclusive = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.InvariantCulture option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionInvariantCulture = [PSRule.Options.ExecutionActionPreference]::Warn,
+
+        # Sets the Execution.UnprocessedObject option
+        [Parameter(Mandatory = $False)]
+        [PSRule.Options.ExecutionActionPreference]$ExecutionUnprocessedObject = [PSRule.Options.ExecutionActionPreference]::Warn,
 
         # Sets the Include.Module option
         [Parameter(Mandatory = $False)]
@@ -2171,19 +2288,31 @@ function SetOptions {
         [Parameter(Mandatory = $False)]
         [String[]]$IncludePath,
 
+        # Sets the Input.FileObjects option
+        [Parameter(Mandatory = $False)]
+        [System.Boolean]$InputFileObjects = $False,
+
         # Sets the Input.Format option
         [Parameter(Mandatory = $False)]
-        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData', 'Detect')]
+        [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'PowerShellData')]
         [Alias('InputFormat')]
-        [PSRule.Configuration.InputFormat]$Format = 'Detect',
+        [PSRule.Options.InputFormat]$Format = 'None',
 
         # Sets the Input.IgnoreGitPath option
         [Parameter(Mandatory = $False)]
         [System.Boolean]$InputIgnoreGitPath = $True,
 
+        # Sets the Input.IgnoreObjectSource option
+        [Parameter(Mandatory = $False)]
+        [System.Boolean]$InputIgnoreObjectSource = $False,
+
         # Sets the Input.IgnoreRepositoryCommon option
         [Parameter(Mandatory = $False)]
         [System.Boolean]$InputIgnoreRepositoryCommon = $True,
+
+        # Sets the Input.IgnoreUnchangedPath option
+        [Parameter(Mandatory = $False)]
+        [System.Boolean]$InputIgnoreUnchangedPath = $False,
 
         # Sets the Input.ObjectPath option
         [Parameter(Mandatory = $False)]
@@ -2243,9 +2372,19 @@ function SetOptions {
         [ValidateSet('None', 'Yaml', 'Json', 'Markdown', 'NUnit3', 'Csv', 'Wide', 'Sarif')]
         [PSRule.Configuration.OutputFormat]$OutputFormat = 'None',
 
+        # Sets the Output.JobSummaryPath option
+        [Parameter(Mandatory = $False)]
+        [String]$OutputJobSummaryPath = '',
+
+        # Sets the Output.JsonIndent option
+        [Parameter(Mandatory = $False)]
+        [ValidateRange(0, 4)]
+        [Alias('JsonIndent')]
+        [int]$OutputJsonIndent = 0,
+
         # Sets the Output.Outcome option
         [Parameter(Mandatory = $False)]
-        [ValidateSet('None', 'Fail', 'Pass', 'Error', 'Processed', 'All')]
+        [ValidateSet('None', 'Fail', 'Pass', 'Error', 'Problem', 'Processed', 'All')]
         [Alias('Outcome')]
         [PSRule.Rules.RuleOutcome]$OutputOutcome = 'Processed',
 
@@ -2262,11 +2401,13 @@ function SetOptions {
         [ValidateSet('Client', 'Plain', 'AzurePipelines', 'GitHubActions', 'VisualStudioCode', 'Detect')]
         [PSRule.Configuration.OutputStyle]$OutputStyle = [PSRule.Configuration.OutputStyle]::Detect,
 
-        # Sets the Output.JsonIndent option
+        # Sets the OverrideLevel option
         [Parameter(Mandatory = $False)]
-        [ValidateRange(0, 4)]
-        [Alias('JsonIndent')]
-        [Int]$OutputJsonIndent = 0,
+        [Hashtable]$OverrideLevel,
+
+        # Sets the Repository.BaseRef option
+        [Parameter(Mandatory = $False)]
+        [String]$RepositoryBaseRef,
 
         # Sets the Repository.Url option
         [Parameter(Mandatory = $False)]
@@ -2278,6 +2419,11 @@ function SetOptions {
     )
     process {
         # Options
+
+        # Sets option Baseline.Group
+        if ($PSBoundParameters.ContainsKey('BaselineGroup')) {
+            $Option.Baseline.Group = $BaselineGroup;
+        }
 
         # Sets option Binding.IgnoreCase
         if ($PSBoundParameters.ContainsKey('BindingIgnoreCase')) {
@@ -2319,29 +2465,59 @@ function SetOptions {
             $Option.Convention.Include = $Convention;
         }
 
-        # Sets option Execution.InconclusiveWarning
-        if ($PSBoundParameters.ContainsKey('InconclusiveWarning')) {
-            $Option.Execution.InconclusiveWarning = $InconclusiveWarning;
+        # Sets option Execution.Break
+        if ($PSBoundParameters.ContainsKey('ExecutionBreak')) {
+            $Option.Execution.Break = $ExecutionBreak;
         }
 
-        # Sets option Execution.NotProcessedWarning
-        if ($PSBoundParameters.ContainsKey('NotProcessedWarning')) {
-            $Option.Execution.NotProcessedWarning = $NotProcessedWarning;
+        # Sets option Execution.DuplicateResourceId
+        if ($PSBoundParameters.ContainsKey('DuplicateResourceId')) {
+            $Option.Execution.DuplicateResourceId = $DuplicateResourceId;
         }
 
-        # Sets option Execution.SuppressedRuleWarning
-        if ($PSBoundParameters.ContainsKey('SuppressedRuleWarning')) {
-            $Option.Execution.SuppressedRuleWarning = $SuppressedRuleWarning;
+        # Sets option Execution.InitialSessionState
+        if ($PSBoundParameters.ContainsKey('InitialSessionState')) {
+            $Option.Execution.InitialSessionState = $InitialSessionState;
         }
 
-        # Sets option Execution.AliasReferenceWarning
-        if ($PSBoundParameters.ContainsKey('AliasReferenceWarning')) {
-            $Option.Execution.AliasReferenceWarning = $AliasReferenceWarning;
+        # Sets option Execution.RestrictScriptSource
+        if ($PSBoundParameters.ContainsKey('RestrictScriptSource')) {
+            $Option.Execution.RestrictScriptSource = $RestrictScriptSource;
         }
 
-        # Sets option Execution.InvariantCultureWarning
-        if ($PSBoundParameters.ContainsKey('InvariantCultureWarning')) {
-            $Option.Execution.InvariantCultureWarning = $InvariantCultureWarning;
+        # Sets option Execution.SuppressionGroupExpired
+        if ($PSBoundParameters.ContainsKey('SuppressionGroupExpired')) {
+            $Option.Execution.SuppressionGroupExpired = $SuppressionGroupExpired;
+        }
+
+        # Sets option Execution.RuleExcluded
+        if ($PSBoundParameters.ContainsKey('ExecutionRuleExcluded')) {
+            $Option.Execution.RuleExcluded = $ExecutionRuleExcluded;
+        }
+
+        # Sets option Execution.RuleSuppressed
+        if ($PSBoundParameters.ContainsKey('ExecutionRuleSuppressed')) {
+            $Option.Execution.RuleSuppressed = $ExecutionRuleSuppressed;
+        }
+
+        # Sets option Execution.AliasReference
+        if ($PSBoundParameters.ContainsKey('ExecutionAliasReference')) {
+            $Option.Execution.AliasReference = $ExecutionAliasReference;
+        }
+
+        # Sets option Execution.RuleInconclusive
+        if ($PSBoundParameters.ContainsKey('ExecutionRuleInconclusive')) {
+            $Option.Execution.RuleInconclusive = $ExecutionRuleInconclusive;
+        }
+
+        # Sets option Execution.InvariantCulture
+        if ($PSBoundParameters.ContainsKey('ExecutionInvariantCulture')) {
+            $Option.Execution.InvariantCulture = $ExecutionInvariantCulture;
+        }
+
+        # Sets option Execution.UnprocessedObject
+        if ($PSBoundParameters.ContainsKey('ExecutionUnprocessedObject')) {
+            $Option.Execution.UnprocessedObject = $ExecutionUnprocessedObject;
         }
 
         # Sets option Include.Module
@@ -2354,6 +2530,11 @@ function SetOptions {
             $Option.Include.Path = $IncludePath;
         }
 
+        # Sets option Input.FileObjects
+        if ($PSBoundParameters.ContainsKey('InputFileObjects')) {
+            $Option.Input.FileObjects = $InputFileObjects;
+        }
+
         # Sets option Input.Format
         if ($PSBoundParameters.ContainsKey('Format')) {
             $Option.Input.Format = $Format;
@@ -2364,9 +2545,19 @@ function SetOptions {
             $Option.Input.IgnoreGitPath = $InputIgnoreGitPath;
         }
 
+        # Sets option Input.IgnoreObjectSource
+        if ($PSBoundParameters.ContainsKey('InputIgnoreObjectSource')) {
+            $Option.Input.IgnoreObjectSource = $InputIgnoreObjectSource;
+        }
+
         # Sets option Input.IgnoreRepositoryCommon
         if ($PSBoundParameters.ContainsKey('InputIgnoreRepositoryCommon')) {
             $Option.Input.IgnoreRepositoryCommon = $InputIgnoreRepositoryCommon;
+        }
+
+        # Sets option Input.IgnoreUnchangedPath
+        if ($PSBoundParameters.ContainsKey('InputIgnoreUnchangedPath')) {
+            $Option.Input.IgnoreUnchangedPath = $InputIgnoreUnchangedPath;
         }
 
         # Sets option Input.ObjectPath
@@ -2434,6 +2625,11 @@ function SetOptions {
             $Option.Output.Format = $OutputFormat;
         }
 
+        # Sets option Output.OutputJobSummaryPath
+        if ($PSBoundParameters.ContainsKey('OutputJobSummaryPath')) {
+            $Option.Output.JobSummaryPath = $OutputJobSummaryPath;
+        }
+
         # Sets option Output.JsonIndent
         if ($PSBoundParameters.ContainsKey('OutputJsonIndent')) {
             $Option.Output.JsonIndent = $OutputJsonIndent;
@@ -2457,6 +2653,16 @@ function SetOptions {
         # Sets option Output.Style
         if ($PSBoundParameters.ContainsKey('OutputStyle')) {
             $Option.Output.Style = $OutputStyle;
+        }
+
+        # Sets option Override.Level
+        if ($PSBoundParameters.ContainsKey('OverrideLevel')) {
+            $Option.Override.Level = $OverrideLevel;
+        }
+
+        # Sets option Repository.BaseRef
+        if ($PSBoundParameters.ContainsKey('RepositoryBaseRef')) {
+            $Option.Repository.BaseRef = $RepositoryBaseRef;
         }
 
         # Sets option Repository.Url

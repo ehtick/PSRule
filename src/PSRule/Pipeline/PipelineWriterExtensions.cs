@@ -1,101 +1,140 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Management.Automation;
-using System.Threading;
+using System.Management.Automation.Language;
 using PSRule.Resources;
 
-namespace PSRule.Pipeline
+namespace PSRule.Pipeline;
+
+/// <summary>
+/// Extensions for the <see cref="IPipelineWriter"/>.
+/// </summary>
+public static class PipelineWriterExtensions
 {
-    internal static class PipelineWriterExtensions
+    /// <summary>
+    /// Write a debug message.
+    /// </summary>
+    public static void WriteDebug(this IPipelineWriter writer, DebugRecord debugRecord)
     {
-        internal static void DebugMessage(this IPipelineWriter logger, string message)
-        {
-            if (logger == null || !logger.ShouldWriteDebug())
-                return;
+        if (debugRecord == null)
+            return;
 
-            logger.WriteDebug(new DebugRecord(message));
-        }
+        writer.WriteDebug(debugRecord.Message);
+    }
 
-        internal static void WarnUsingInvariantCulture(this IPipelineWriter writer)
-        {
-            if (writer == null || !writer.ShouldWriteWarning())
-                return;
+    internal static void DebugMessage(this IPipelineWriter logger, string message)
+    {
+        if (logger == null || !logger.ShouldWriteDebug())
+            return;
 
-            writer.WriteWarning(PSRuleResources.UsingInvariantCulture);
-        }
+        logger.WriteDebug(new DebugRecord(message));
+    }
 
-        internal static void WarnRulePathNotFound(this IPipelineWriter writer)
-        {
-            if (writer == null || !writer.ShouldWriteWarning())
-                return;
+    internal static void WarnRulePathNotFound(this IPipelineWriter writer)
+    {
+        if (writer == null || !writer.ShouldWriteWarning())
+            return;
 
-            writer.WriteWarning(PSRuleResources.RulePathNotFound);
-        }
+        writer.WriteWarning(PSRuleResources.RulePathNotFound);
+    }
 
-        internal static void WarnModuleManifestBaseline(this IPipelineWriter writer, string moduleName)
-        {
-            if (writer == null || !writer.ShouldWriteWarning())
-                return;
+    internal static void WriteWarning(this IPipelineWriter writer, string message, params object[] args)
+    {
+        if (writer == null || !writer.ShouldWriteWarning() || string.IsNullOrEmpty(message))
+            return;
 
-            writer.WriteWarning(PSRuleResources.ModuleManifestBaseline, moduleName);
-        }
+        writer.WriteWarning(Format(message, args));
+    }
 
-        internal static void WriteWarning(this IPipelineWriter writer, string message, params object[] args)
-        {
-            if (writer == null || !writer.ShouldWriteWarning() || string.IsNullOrEmpty(message))
-                return;
+    internal static void ErrorRequiredVersionMismatch(this IPipelineWriter writer, string moduleName, string moduleVersion, string requiredVersion)
+    {
+        if (writer == null || !writer.ShouldWriteError())
+            return;
 
-            writer.WriteWarning(Format(message, args));
-        }
+        writer.WriteError(
+            new PipelineBuilderException(string.Format(Thread.CurrentThread.CurrentCulture, PSRuleResources.RequiredVersionMismatch, moduleName, moduleVersion, requiredVersion)),
+            "PSRule.RequiredVersionMismatch",
+            ErrorCategory.InvalidOperation
+        );
+    }
 
-        internal static void ErrorRequiredVersionMismatch(this IPipelineWriter writer, string moduleName, string moduleVersion, string requiredVersion)
-        {
-            if (writer == null || !writer.ShouldWriteError())
-                return;
+    internal static void ErrorReadFileFailed(this IPipelineWriter writer, string path, Exception innerException)
+    {
+        if (writer == null || !writer.ShouldWriteError())
+            return;
 
-            writer.WriteError(
-                new PipelineBuilderException(string.Format(Thread.CurrentThread.CurrentCulture, PSRuleResources.RequiredVersionMismatch, moduleName, moduleVersion, requiredVersion)),
-                "PSRule.RequiredVersionMismatch",
-                ErrorCategory.InvalidOperation
-            );
-        }
+        writer.WriteError(
+            new PipelineSerializationException(string.Format(Thread.CurrentThread.CurrentCulture, PSRuleResources.ReadFileFailed, path, innerException.Message), path, innerException),
+            "PSRule.ReadFileFailed",
+            ErrorCategory.InvalidData
+        );
+    }
 
-        internal static void ErrorReadFileFailed(this IPipelineWriter writer, string path, Exception innerException)
-        {
-            if (writer == null || !writer.ShouldWriteError())
-                return;
+    internal static void ErrorReadInputFailed(this IPipelineWriter writer, string path, Exception innerException)
+    {
+        if (writer == null || !writer.ShouldWriteError())
+            return;
 
-            writer.WriteError(
-                new PipelineSerializationException(string.Format(Thread.CurrentThread.CurrentCulture, PSRuleResources.ReadFileFailed, path, innerException.Message), path, innerException),
-                "PSRule.ReadFileFailed",
-                ErrorCategory.InvalidData
-            );
-        }
+        writer.WriteError(
+            new PipelineSerializationException(string.Format(Thread.CurrentThread.CurrentCulture, PSRuleResources.ReadInputFailed, path, innerException.Message), path, innerException),
+            "PSRule.ReadInputFailed",
+            ErrorCategory.ReadError
+        );
+    }
 
-        internal static void WriteError(this IPipelineWriter writer, PipelineException exception, string errorId, ErrorCategory errorCategory)
-        {
-            if (writer == null)
-                return;
+    internal static void VerboseInputAdded(this IPipelineWriter writer, string path)
+    {
+        if (writer == null || !writer.ShouldWriteVerbose() || string.IsNullOrEmpty(path))
+            return;
 
-            writer.WriteError(new ErrorRecord(exception, errorId, errorCategory, null));
-        }
+        writer.WriteVerbose(string.Format(Thread.CurrentThread.CurrentCulture, PSRuleResources.InputAdded, path));
+    }
 
-        internal static void WriteDebug(this IPipelineWriter writer, string message, params object[] args)
-        {
-            if (writer == null || !writer.ShouldWriteDebug() || string.IsNullOrEmpty(message))
-                return;
+    internal static void WriteError(this IPipelineWriter writer, PipelineException exception, string errorId, ErrorCategory errorCategory)
+    {
+        if (writer == null)
+            return;
 
-            writer.WriteDebug(new DebugRecord
-            (
-                message: Format(message, args)
-            ));
-        }
+        writer.WriteError(new ErrorRecord(exception, errorId, errorCategory, null));
+    }
 
-        private static string Format(string message, params object[] args)
-        {
-            return args == null || args.Length == 0 ? message : string.Format(Thread.CurrentThread.CurrentCulture, message, args);
-        }
+    internal static void WriteError(this IPipelineWriter writer, ParseError error)
+    {
+        if (writer == null || !writer.ShouldWriteError())
+            return;
+
+        var record = new ErrorRecord
+        (
+            exception: new Pipeline.ParseException(message: error.Message, errorId: error.ErrorId),
+            errorId: error.ErrorId,
+            errorCategory: ErrorCategory.InvalidOperation,
+            targetObject: null
+        );
+        writer.WriteError(errorRecord: record);
+    }
+
+    internal static void WriteDebug(this IPipelineWriter writer, string message, params object[] args)
+    {
+        if (writer == null || !writer.ShouldWriteDebug() || string.IsNullOrEmpty(message))
+            return;
+
+        writer.WriteDebug(new DebugRecord
+        (
+            message: Format(message, args)
+        ));
+    }
+
+    internal static void VerboseRuleDiscovery(this IPipelineWriter writer, string path)
+    {
+        if (writer == null || !writer.ShouldWriteVerbose() || string.IsNullOrEmpty(path))
+            return;
+
+        writer.WriteVerbose($"[PSRule][D] -- Discovering rules in: {path}");
+    }
+
+    private static string Format(string message, params object[] args)
+    {
+        return args == null || args.Length == 0 ? message : string.Format(Thread.CurrentThread.CurrentCulture, message, args);
     }
 }

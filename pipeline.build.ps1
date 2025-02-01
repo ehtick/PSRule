@@ -104,6 +104,8 @@ task BuildDotNet {
     }
     exec {
         # Build library
+        dotnet build src/PSRule.Tool -c $Configuration -f net8.0 -p:version=$Build
+        dotnet build src/PSRule.SDK -c $Configuration -f netstandard2.0 -p:version=$Build
         dotnet publish src/PSRule -c $Configuration -f netstandard2.0 -o $(Join-Path -Path $PWD -ChildPath out/modules/PSRule) -p:version=$Build
     }
 }
@@ -112,15 +114,47 @@ task TestDotNet {
     if ($CodeCoverage) {
         exec {
             # Test library
-            dotnet test --collect:"Code Coverage" --logger trx -r (Join-Path $PWD -ChildPath reports/) tests/PSRule.Tests
+            # dotnet test --collect:"Code Coverage" --logger trx -r ../../../../../reports/ tests/PSRule.Tests
+            dotnet test
         }
     }
     else {
         exec {
             # Test library
             # dotnet test --logger "console;verbosity=detailed" tests/PSRule.Tests
-            dotnet test --logger trx -r (Join-Path $PWD -ChildPath reports/) tests/PSRule.Tests
+            # dotnet test --logger trx -r ../../../../../reports/ tests/PSRule.Tests
+            dotnet test
         }
+    }
+}
+
+task BuildCLI BuildModule, {
+    exec {
+        # Build library
+        dotnet publish src/PSRule.Tool -c $Configuration --self-contained true -o ./out/cli/build/ -p:version=$Build
+    }
+}
+
+task ReleaseCLI BuildModule, {
+
+    # Build win-x64
+    exec {
+        dotnet publish src/PSRule.Tool -c $Configuration --self-contained true --runtime win-x64 -o ./out/cli/win-x64/ -p:version=$Build
+    }
+
+    # Build linux-x64
+    exec {
+        dotnet publish src/PSRule.Tool -c $Configuration --self-contained true --runtime linux-x64 -o ./out/cli/linux-x64/ -p:version=$Build
+    }
+
+    # Build linux-musl-x64
+    exec {
+        dotnet publish src/PSRule.Tool -c $Configuration --self-contained true --runtime linux-musl-x64 -o ./out/cli/linux-musl-x64/ -p:version=$Build
+    }
+
+    # Build osx-x64
+    exec {
+        dotnet publish src/PSRule.Tool -c $Configuration --self-contained true --runtime osx-x64 -o ./out/cli/osx-x64/ -p:version=$Build
     }
 }
 
@@ -243,7 +277,7 @@ task NuGet {
 
 task Dependencies NuGet, {
     Import-Module $PWD/scripts/dependencies.psm1;
-    Install-Dependencies -Path $PWD/modules.json;
+    Install-Dependencies -Path $PWD/modules.json -Dev;
 }
 
 # Synopsis: Test the module
@@ -298,7 +332,7 @@ task TestModule Dependencies, {
     }
 }
 
-# Synopsis: Run validation
+# Synopsis: Run self-test validation.
 task Rules {
     $assertParams = @{
         Path = './.ps-rule/'
@@ -307,26 +341,12 @@ task Rules {
         As = 'Summary'
     }
     Import-Module (Join-Path -Path $PWD -ChildPath out/modules/PSRule) -Force;
-    Assert-PSRule @assertParams -OutputPath reports/ps-rule-file.xml -InputPath $PWD -Format File -ErrorAction Stop;
+    Assert-PSRule @assertParams -OutputPath reports/ps-rule-file.xml -InputPath $PWD -ErrorAction Stop -Option ./ps-rule-ci.yaml;
 }
 
 task Benchmark {
     if ($Benchmark -or $BuildTask -eq 'Benchmark') {
-        dotnet run -p src/PSRule.Benchmark -f netcoreapp3.1 -c Release -- benchmark --output $PWD;
-    }
-}
-
-# Synopsis: Add shipit build tag
-task TagBuild {
-    if ($Null -ne $Env:BUILD_DEFINITIONNAME) {
-        Write-Host "`#`#vso[build.addbuildtag]shipit";
-    }
-}
-
-# Synopsis: Attach a change log to the output
-task AttachChangeLog {
-    if ($AssertStyle -eq 'AzurePipelines') {
-        Write-Host "`#`#vso[task.addattachment type=Distributedtask.Core.Summary;name=Change Log;]$(Join-Path -Path $PWD -ChildPath 'CHANGELOG.md')";
+        dotnet run --project src/PSRule.Benchmark -f net8.0 -c Release -- benchmark --output $PWD;
     }
 }
 
@@ -336,13 +356,13 @@ task Analyze Build, Dependencies, {
 }
 
 # Synopsis: Build and test.
-task . Build, Rules, TestDotNet, Benchmark, AttachChangeLog
+task . Build, Rules, TestDotNet, Benchmark
 
 # Synopsis: Build the project
 task Build Clean, BuildModule, BuildHelp, VersionModule, PackageModule
 
 task Test Build, Rules, TestDotNet, TestModule
 
-task Release ReleaseModule, TagBuild
+task Release ReleaseModule
 
 task AnalyzeRepository Build, Rules

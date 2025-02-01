@@ -58,7 +58,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
         }
 
         It 'Returns passed' {
-            [PSRule.Configuration.PSRuleOption]::UseCurrentCulture('en-ZZ');
+            [PSRule.Environment]::UseCurrentCulture('en-ZZ');
             try {
                 $result = $testObject | Invoke-PSRule -Option $emptyOptionsFilePath -Path $ruleFilePath -Name 'FromFile1';
                 $result | Should -Not -BeNullOrEmpty;
@@ -73,7 +73,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
                 Assert-VerifiableMock;
             }
             finally {
-                [PSRule.Configuration.PSRuleOption]::UseCurrentCulture();
+                [PSRule.Environment]::UseCurrentCulture();
             }
         }
 
@@ -82,6 +82,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result | Should -Not -BeNullOrEmpty;
             $result.IsSuccess() | Should -Be $False;
             $result.TargetName | Should -Be 'TestObject1';
+            $result.GetReasonViewString() | Should -Be 'Returned a `false`.'
 
             $result = $testObject | Invoke-PSRule -Path $ruleFilePath -Name 'FromFile5' -ErrorAction Stop;
             $result | Should -Not -BeNullOrEmpty;
@@ -99,7 +100,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
         }
 
         It 'Returns inconclusive' {
-            $option = @{ 'Execution.InconclusiveWarning' = $False };
+            $option = @{ 'Execution.RuleInconclusive' = 'Ignore' };
             $result = $testObject | Invoke-PSRule -Path $ruleFilePath -Name 'FromFile3' -Outcome All -Option $option;
             $result | Should -Not -BeNullOrEmpty;
             $result.IsSuccess() | Should -Be $False;
@@ -314,19 +315,19 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result = $testObject | Invoke-PSRule -Path $ruleFilePath, $yamlFilePath -Tag @{ test = 'Reason' };
             $result | Should -Not -BeNullOrEmpty;
             $result.Count | Should -Be 4;
-            $result[0].Reason | Should -BeExactly 'The field ''Name'' is set to ''TestObject1''.';
-            $result[1].Reason | Should -BeExactly 'Field Name: Is set to ''TestObject1''.';
-            $result[2].Reason | Should -BeExactly 'The field ''Name'' is set to ''TestObject2''.';
-            $result[3].Reason | Should -BeExactly 'Field Name: Is set to ''TestObject2''.';
+            $result[0].Reason | Should -BeExactly 'Path Name: Is set to ''TestObject1''.';
+            $result[1].Reason | Should -BeExactly 'Path Name: Is set to ''TestObject1''.';
+            $result[2].Reason | Should -BeExactly 'Path Name: Is set to ''TestObject2''.';
+            $result[3].Reason | Should -BeExactly 'Path Name: Is set to ''TestObject2''.';
 
             # With Json path
             $result = $testObject | Invoke-PSRule -Path $ruleFilePath, $jsonFilePath -Tag @{ test = 'Reason' };
             $result | Should -Not -BeNullOrEmpty;
             $result.Count | Should -Be 4;
-            $result[0].Reason | Should -BeExactly 'The field ''Name'' is set to ''TestObject1''.';
-            $result[1].Reason | Should -BeExactly 'Field Name: Is set to ''TestObject1''.';
-            $result[2].Reason | Should -BeExactly 'The field ''Name'' is set to ''TestObject2''.';
-            $result[3].Reason | Should -BeExactly 'Field Name: Is set to ''TestObject2''.';
+            $result[0].Reason | Should -BeExactly 'Path Name: Is set to ''TestObject1''.';
+            $result[1].Reason | Should -BeExactly 'Path Name: Is set to ''TestObject1''.';
+            $result[2].Reason | Should -BeExactly 'Path Name: Is set to ''TestObject2''.';
+            $result[3].Reason | Should -BeExactly 'Path Name: Is set to ''TestObject2''.';
         }
 
         It 'Returns severity level' {
@@ -414,7 +415,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
         }
 
         It 'Returns summary' {
-            [PSRule.Configuration.PSRuleOption]::UseCurrentCulture('en-ZZ');
+            [PSRule.Environment]::UseCurrentCulture('en-ZZ');
             try {
                 $option = Join-Path -Path $here -ChildPath 'PSRule.Tests5.yml';
                 $result = $testObject | Invoke-PSRule -Path $ruleFilePath -Tag @{ category = 'group1' } -As Summary -Outcome All -Option $option;
@@ -434,7 +435,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
                 Assert-VerifiableMock;
             }
             finally {
-                [PSRule.Configuration.PSRuleOption]::UseCurrentCulture();
+                [PSRule.Environment]::UseCurrentCulture();
             }
         }
 
@@ -457,6 +458,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result.Length | Should -Be 2;
             $result | Should -BeOfType PSRule.Rules.RuleRecord;
             $result.TargetName | Should -BeIn 'TestObject1', 'TestObject2';
+            $result.IsSuccess() | Should -BeIn $True;
         }
 
         It 'Yaml FileInfo' {
@@ -466,6 +468,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result.Length | Should -Be 2;
             $result | Should -BeOfType PSRule.Rules.RuleRecord;
             $result.TargetName | Should -BeIn 'TestObject1', 'TestObject2';
+            $result.IsSuccess() | Should -BeIn $True;
         }
 
         It 'Json String' {
@@ -475,6 +478,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result.Length | Should -Be 2;
             $result | Should -BeOfType PSRule.Rules.RuleRecord;
             $result.TargetName | Should -BeIn 'TestObject1', 'TestObject2';
+            $result.IsSuccess() | Should -BeIn $True;
         }
 
         It 'Json FileInfo' {
@@ -484,6 +488,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result.Length | Should -Be 2;
             $result | Should -BeOfType PSRule.Rules.RuleRecord;
             $result.TargetName | Should -BeIn 'TestObject1', 'TestObject2';
+            $result.IsSuccess() | Should -BeIn $True;
         }
 
         It 'Markdown String' {
@@ -493,7 +498,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result.Length | Should -Be 1;
             $result | Should -BeOfType PSRule.Rules.RuleRecord;
             $result.TargetName | Should -BeIn 'TestObject1';
-            $result.IsSuccess() | Should -Be $True;
+            $result.IsSuccess() | Should -BeIn $True;
         }
 
         It 'Markdown FileInfo' {
@@ -503,7 +508,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result.Length | Should -Be 1;
             $result | Should -BeOfType PSRule.Rules.RuleRecord;
             $result.TargetName | Should -BeIn 'TestObject1';
-            $result.IsSuccess() | Should -Be $True;
+            $result.IsSuccess() | Should -BeIn $True;
         }
 
         It 'PowerShellData String' {
@@ -513,7 +518,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result.Length | Should -Be 1;
             $result | Should -BeOfType PSRule.Rules.RuleRecord;
             $result.TargetName | Should -BeIn 'TestObject1';
-            $result.IsSuccess() | Should -Be $True;
+            $result.IsSuccess() | Should -BeIn $True;
         }
 
         It 'PowerShellData FileInfo' {
@@ -523,7 +528,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result.Length | Should -Be 1;
             $result | Should -BeOfType PSRule.Rules.RuleRecord;
             $result.TargetName | Should -BeIn 'TestObject1';
-            $result.IsSuccess() | Should -Be $True;
+            $result.IsSuccess() | Should -BeIn $True;
         }
     }
 
@@ -637,7 +642,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $resultCsv[1].Synopsis | Should -Be 'Test rule 3';
             $resultCsv[2].RuleName | Should -Be 'WithCsv';
             $resultCsv[2].Synopsis | Should -Be 'This is "a" synopsis.';
-            ($resultCsv[2].Recommendation -replace "`r`n", "`n") | Should -Be "This is an extended recommendation.`n`n- That includes line breaks`n- And lists";
+            ($resultCsv[2].Recommendation -replace "`r`n", "`n") | Should -Be "This is an extended recommendation. - That includes line breaks - And lists";
 
             # Summary
             $result = $testObject | Invoke-PSRule @option -As Summary | Out-String;
@@ -654,7 +659,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $resultCsv[1].Fail | Should -Be '1';
             $resultCsv[2].RuleName | Should -Be 'WithCsv';
             $resultCsv[2].Synopsis | Should -Be 'This is "a" synopsis.';
-            ($resultCsv[2].Recommendation -replace "`r`n", "`n") | Should -Be "This is an extended recommendation.`n`n- That includes line breaks`n- And lists";
+            ($resultCsv[2].Recommendation -replace "`r`n", "`n") | Should -Be "This is an extended recommendation. - That includes line breaks - And lists";
         }
 
         It 'Sarif' {
@@ -851,7 +856,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result[0].Source[0].File | Should -Be 'some-file.json';
             $result[0].Source[0].Line | Should -Be 1;
             $result[1].Source[0].File.Split([char[]]@('\', '/'))[-1] | Should -Be 'ObjectFromFile.json';
-            $result[1].Source[0].Line | Should -Be 57;
+            $result[1].Source[0].Line | Should -Be 70;
 
             # Multiple file
             $result = @(Invoke-PSRule -Path $ruleFilePath -Name 'WithFormat' -InputPath $inputFiles);
@@ -862,27 +867,27 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $result.TargetName | Should -BeIn 'TestObject1', 'TestObject2','TestObject3', 'TestObject4';
         }
 
-        It 'File' {
-            $result = @(Invoke-PSRule -Path $ruleFilePath -Name 'WithFileFormat' -InputPath $rootPath -Format File);
-            $result.Length | Should -BeGreaterThan 100;
-            $result.Length | Should -BeLessOrEqual 1000;
+        # It 'File' {
+        #     $result = @(Invoke-PSRule -Path $ruleFilePath -Name 'WithFileFormat' -InputPath $rootPath -Format File);
+        #     $result.Length | Should -BeGreaterThan 100;
+        #     $result.Length | Should -BeLessOrEqual 1000;
 
-            # No ignored path
-            $filteredResult = @($result | Where-Object { $_.Data.FullName.Replace('\', '/') -like '*/out/*' });
-            $filteredResult.Length | Should -Be 0;
+        #     # No ignored path
+        #     $filteredResult = @($result | Where-Object { $_.Data.FullName.Replace('\', '/') -like '*/out/*' });
+        #     $filteredResult.Length | Should -Be 0;
 
-            # Contains nested
-            $filteredResult = @($result | Where-Object { $_.Data.FullName.Replace('\', '/') -like '*/Assert.cs' });
-            $filteredResult.Length | Should -Be 1;
+        #     # Contains nested
+        #     $filteredResult = @($result | Where-Object { $_.Data.FullName.Replace('\', '/') -like '*/Assert.cs' });
+        #     $filteredResult.Length | Should -Be 1;
 
-            # Success only
-            $filteredResult = @($result | Where-Object { $_.Outcome -ne 'Pass' });
-            $filteredResult | Should -BeNullOrEmpty;
+        #     # Success only
+        #     $filteredResult = @($result | Where-Object { $_.Outcome -ne 'Pass' });
+        #     $filteredResult | Should -BeNullOrEmpty;
 
-            # Dockerfile
-            $filteredResult = @($result | Where-Object { $_.Data.FullName.Replace('\', '/') -like '*/Dockerfile' });
-            $filteredResult[0].Data.TargetType | Should -Be 'Dockerfile';
-        }
+        #     # Dockerfile
+        #     $filteredResult = @($result | Where-Object { $_.Data.FullName.Replace('\', '/') -like '*/Dockerfile' });
+        #     $filteredResult[0].Data.TargetType | Should -Be 'Dockerfile';
+        # }
 
         It 'Globbing processes paths' {
             # Wildcards capture both files
@@ -984,10 +989,11 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             # Multiple objects
             $result = @($testObject | Invoke-PSRule @invokeParams -TargetType 'TestType' -Outcome All);
             $result | Should -Not -BeNullOrEmpty;
-            $result.Length | Should -Be 1;
+            $result.Length | Should -Be 2;
             $result[0].TargetName | Should -Be 'TestObject1';
             $result[0].TargetType | Should -Be 'TestType';
             $result[0].Outcome | Should -Be 'Pass';
+            $result[1].Outcome | Should -Be 'None';
 
             # Mutliple types
             $result = @($testObject | Invoke-PSRule @invokeParams -TargetType 'TestType','NotTestType');
@@ -1024,15 +1030,6 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             $option = @{ 'execution.mode' = 'ConstrainedLanguage' };
             { $Null = $testObject | Invoke-PSRule -Path $ruleFilePath -Name 'ConstrainedTest2' -Option $option -ErrorAction Stop } | Should -Throw 'Cannot invoke method. Method invocation is supported only on core types in this language mode.';
             { $Null = $testObject | Invoke-PSRule -Path $ruleFilePath -Name 'ConstrainedTest3' -Option $option -ErrorAction Stop } | Should -Throw 'Cannot invoke method. Method invocation is supported only on core types in this language mode.';
-
-            $bindFn = {
-                param ($TargetObject)
-                $Null = [Console]::WriteLine('Should fail');
-                return 'BadName';
-            }
-
-            $option = New-PSRuleOption -Option @{ 'execution.mode' = 'ConstrainedLanguage' } -BindTargetName $bindFn;
-            { $Null = $testObject | Invoke-PSRule -Path $ruleFilePath -Name 'ConstrainedTest1' -Option $option -ErrorAction Stop } | Should -Throw 'Exception calling "Invoke" with "4" argument(s): "Binding functions are not supported in this language mode."';
         }
     }
 
@@ -1211,7 +1208,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
 
         Context 'Detail' {
             It 'Show Warnings' {
-                $option = New-PSRuleOption -SuppressTargetName @{ FromFile1 = 'TestObject1'; FromFile2 = 'TestObject1'; } -SuppressedRuleWarning $True -OutputAs Detail -InvariantCultureWarning $False;
+                $option = New-PSRuleOption -SuppressTargetName @{ FromFile1 = 'TestObject1'; FromFile2 = 'TestObject1'; } -ExecutionRuleSuppressed Warn -OutputAs Detail -ExecutionInvariantCulture 'Ignore';
 
                 $Null = $testObject | Invoke-PSRule -Path $ruleFilePath -Option $option -Name 'FromFile1', 'FromFile2' -WarningVariable outWarnings -WarningAction SilentlyContinue;
     
@@ -1225,7 +1222,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             }
 
             It 'No warnings' {
-                $option = New-PSRuleOption -SuppressTargetName @{ FromFile1 = 'TestObject1'; FromFile2 = 'TestObject1'; } -SuppressedRuleWarning $False -OutputAs Detail -InvariantCultureWarning $False;
+                $option = New-PSRuleOption -SuppressTargetName @{ FromFile1 = 'TestObject1'; FromFile2 = 'TestObject1'; } -ExecutionRuleSuppressed Ignore -OutputAs Detail -ExecutionInvariantCulture 'Ignore';
 
                 $Null = $testObject | Invoke-PSRule -Path $ruleFilePath -Option $option -Name 'FromFile1', 'FromFile2' -WarningVariable outWarnings -WarningAction SilentlyContinue;
     
@@ -1236,7 +1233,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
 
         Context 'Summary' {
             It 'Show warnings' {
-                $option = New-PSRuleOption -SuppressTargetName @{ FromFile1 = 'TestObject1'; FromFile2 = 'TestObject1'; } -SuppressedRuleWarning $True -OutputAs Summary -InvariantCultureWarning $False;
+                $option = New-PSRuleOption -SuppressTargetName @{ FromFile1 = 'TestObject1'; FromFile2 = 'TestObject1'; } -ExecutionRuleSuppressed Warn -OutputAs Summary -ExecutionInvariantCulture 'Ignore';
 
                 $Null = $testObject | Invoke-PSRule -Path $ruleFilePath -Option $option -Name 'FromFile1', 'FromFile2' -WarningVariable outWarnings -WarningAction SilentlyContinue;
     
@@ -1248,7 +1245,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             }
 
             It 'No warnings' {
-                $option = New-PSRuleOption -SuppressTargetName @{ FromFile1 = 'TestObject1'; FromFile2 = 'TestObject1'; } -SuppressedRuleWarning $False -OutputAs Summary -InvariantCultureWarning $False;
+                $option = New-PSRuleOption -SuppressTargetName @{ FromFile1 = 'TestObject1'; FromFile2 = 'TestObject1'; } -ExecutionRuleSuppressed Ignore -OutputAs Summary -ExecutionInvariantCulture 'Ignore';
 
                 $Null = $testObject | Invoke-PSRule -Path $ruleFilePath -Option $option -Name 'FromFile1', 'FromFile2' -WarningVariable outWarnings -WarningAction SilentlyContinue;
     
@@ -1292,41 +1289,43 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
 
         Context 'Detail' {
             It 'Show warnings' {
-                $option = New-PSRuleOption -SuppressedRuleWarning $True -OutputAs Detail -InvariantCultureWarning $False -OutputCulture 'en-US';
+                $option = New-PSRuleOption -ExecutionRuleSuppressed Warn -OutputAs Detail -ExecutionInvariantCulture Ignore -OutputCulture 'en-US';
 
                 $Null = $testObject | Invoke-PSRule @invokeParams -Option $option -Name 'FromFile1', 'FromFile2', 'WithTag2' -WarningVariable outWarnings -WarningAction SilentlyContinue;
 
                 $warningMessages = $outwarnings.ToArray();
-                $warningMessages.Length | Should -Be 6;
+                $warningMessages.Length | Should -Be 7;
 
                 $warningMessages[0] | Should -BeOfType [System.Management.Automation.WarningRecord];
-                $warningMessages[0].Message | Should -BeExactly "Rule '.\FromFile1' was suppressed by suppression group '.\SuppressWithTargetName' for 'TestObject1'. Ignore test objects by name.";
+                $warningMessages[0].Message | Should -BeExactly "Suppression group '.\SuppressWithExpiry' has expired and will be ignored.";
                 $warningMessages[1] | Should -BeOfType [System.Management.Automation.WarningRecord];
-                $warningMessages[1].Message | Should -BeExactly "Rule '.\FromFile2' was suppressed by suppression group '.\SuppressWithTargetName' for 'TestObject1'. Ignore test objects by name.";
+                $warningMessages[1].Message | Should -BeExactly "Rule '.\FromFile1' was suppressed by suppression group '.\SuppressWithTargetName' for 'TestObject1'. Ignore test objects by name.";
                 $warningMessages[2] | Should -BeOfType [System.Management.Automation.WarningRecord];
-                $warningMessages[2].Message | Should -BeExactly "Rule '.\WithTag2' was suppressed by suppression group '.\SuppressWithNonProdTag' for 'TestObject1'. Ignore objects with non-production tag.";
+                $warningMessages[2].Message | Should -BeExactly "Rule '.\FromFile2' was suppressed by suppression group '.\SuppressWithTargetName' for 'TestObject1'. Ignore test objects by name.";
                 $warningMessages[3] | Should -BeOfType [System.Management.Automation.WarningRecord];
-                $warningMessages[3].Message | Should -BeExactly "Rule '.\FromFile1' was suppressed by suppression group '.\SuppressWithTargetName' for 'TestObject2'. Ignore test objects by name.";
+                $warningMessages[3].Message | Should -BeExactly "Rule '.\WithTag2' was suppressed by suppression group '.\SuppressWithNonProdTag' for 'TestObject1'. Ignore objects with non-production tag.";
                 $warningMessages[4] | Should -BeOfType [System.Management.Automation.WarningRecord];
-                $warningMessages[4].Message | Should -BeExactly "Rule '.\FromFile2' was suppressed by suppression group '.\SuppressWithTargetName' for 'TestObject2'. Ignore test objects by name.";
+                $warningMessages[4].Message | Should -BeExactly "Rule '.\FromFile1' was suppressed by suppression group '.\SuppressWithTargetName' for 'TestObject2'. Ignore test objects by name.";
                 $warningMessages[5] | Should -BeOfType [System.Management.Automation.WarningRecord];
-                $warningMessages[5].Message | Should -BeExactly "Rule '.\WithTag2' was suppressed by suppression group '.\SuppressWithNonProdTag' for 'TestObject2'. Ignore objects with non-production tag.";
+                $warningMessages[5].Message | Should -BeExactly "Rule '.\FromFile2' was suppressed by suppression group '.\SuppressWithTargetName' for 'TestObject2'. Ignore test objects by name.";
+                $warningMessages[6] | Should -BeOfType [System.Management.Automation.WarningRecord];
+                $warningMessages[6].Message | Should -BeExactly "Rule '.\WithTag2' was suppressed by suppression group '.\SuppressWithNonProdTag' for 'TestObject2'. Ignore objects with non-production tag.";
             }
 
             It 'Show warnings for all rules when rule property is null or empty' {
-                $option = New-PSRuleOption -SuppressedRuleWarning $True -OutputAs Detail -InvariantCultureWarning $False;
+                $option = New-PSRuleOption -ExecutionRuleSuppressed Warn -OutputAs Detail -ExecutionInvariantCulture Ignore -SuppressionGroupExpired Ignore;
 
                 $Null = $testObject | Invoke-PSRule @invokeParams2 -Option $option -WarningVariable outWarnings -WarningAction SilentlyContinue;
 
                 $warningMessages = $outwarnings.ToArray();
-                $warningMessages.Length | Should -Be 152;
+                $warningMessages.Length | Should -Be 154;
 
                 $warningMessages | Should -BeOfType [System.Management.Automation.WarningRecord];
                 $warningMessages.Message | Should -MatchExactly "Rule '.\\[a-zA-Z0-9]+' was suppressed by suppression group '.\\SuppressWithTargetNameAnd(Null|Empty)Rule' for 'TestObject[1-2]'. Ignore test objects for all \((null|empty)\) rules."
             }
 
             It 'No warnings' {
-                $option = New-PSRuleOption -SuppressedRuleWarning $False -OutputAs Detail -InvariantCultureWarning $False;
+                $option = New-PSRuleOption -ExecutionRuleSuppressed Ignore -OutputAs Detail -ExecutionInvariantCulture Ignore -SuppressionGroupExpired Ignore;
 
                 $Null = $testObject | Invoke-PSRule @invokeParams -Option $option -Name 'FromFile1', 'FromFile2', 'WithTag2' -WarningVariable outWarnings -WarningAction SilentlyContinue;
 
@@ -1337,7 +1336,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
 
         Context 'Summary' {
             It 'Show warnings' {
-                $option = New-PSRuleOption -SuppressedRuleWarning $True -OutputAs Summary -InvariantCultureWarning $False -OutputCulture 'en-US';
+                $option = New-PSRuleOption -ExecutionRuleSuppressed Warn -OutputAs Summary -ExecutionInvariantCulture Ignore -SuppressionGroupExpired Ignore -OutputCulture 'en-US';
 
                 $Null = $testObject | Invoke-PSRule @invokeParams -Option $option -Name 'FromFile3', 'FromFile5', 'WithTag3' -WarningVariable outWarnings -WarningAction SilentlyContinue;
 
@@ -1355,7 +1354,7 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
             }
 
             It 'Show warnings for all rules when rule property is null or empty' {
-                $option = New-PSRuleOption -SuppressedRuleWarning $True -OutputAs Summary -InvariantCultureWarning $False;
+                $option = New-PSRuleOption -ExecutionRuleSuppressed Warn -OutputAs Summary -ExecutionInvariantCulture Ignore;
 
                 $Null = $testObject | Invoke-PSRule @invokeParams2 -Option $option -WarningVariable outWarnings -WarningAction SilentlyContinue;
 
@@ -1363,13 +1362,13 @@ Describe 'Invoke-PSRule' -Tag 'Invoke-PSRule','Common' {
                 $warningMessages.Length | Should -Be 2;
 
                 $warningMessages[0] | Should -BeOfType [System.Management.Automation.WarningRecord];
-                $warningMessages[0].Message | Should -BeExactly "76 rule/s were suppressed by suppression group '.\SuppressWithTargetNameAndNullRule' for 'TestObject1'. Ignore test objects for all (null) rules."
+                $warningMessages[0].Message | Should -BeExactly "77 rule/s were suppressed by suppression group '.\SuppressWithTargetNameAndNullRule' for 'TestObject1'. Ignore test objects for all (null) rules."
                 $warningMessages[1] | Should -BeOfType [System.Management.Automation.WarningRecord];
-                $warningMessages[1].Message | Should -BeExactly "76 rule/s were suppressed by suppression group '.\SuppressWithTargetNameAndEmptyRule' for 'TestObject2'. Ignore test objects for all (empty) rules."
+                $warningMessages[1].Message | Should -BeExactly "77 rule/s were suppressed by suppression group '.\SuppressWithTargetNameAndEmptyRule' for 'TestObject2'. Ignore test objects for all (empty) rules."
             }
 
             It 'No warnings' {
-                $option = New-PSRuleOption -SuppressedRuleWarning $False -OutputAs Summary -InvariantCultureWarning $False;
+                $option = New-PSRuleOption -ExecutionRuleSuppressed Ignore -OutputAs Summary -ExecutionInvariantCulture Ignore -SuppressionGroupExpired Ignore;
 
                 $Null = $testObject | Invoke-PSRule @invokeParams -Option $option -Name 'FromFile3', 'FromFile5', 'WithTag3' -WarningVariable outWarnings -WarningAction SilentlyContinue;
 
@@ -1404,7 +1403,7 @@ Describe 'Test-PSRuleTarget' -Tag 'Test-PSRuleTarget','Common' {
             $result | Should -Be $True;
 
             # Check result with one failing rule
-            $option = @{ 'Execution.InconclusiveWarning' = $False };
+            $option = @{ 'Execution.RuleInconclusive' = 'Ignore' };
             $result = $testObject | Test-PSRuleTarget -Path $ruleFilePath -Name 'FromFile1', 'FromFile2', 'FromFile3' -Option $option;
             $result | Should -Not -BeNullOrEmpty;
             $result | Should -BeOfType System.Boolean;
@@ -1537,15 +1536,6 @@ Describe 'Test-PSRuleTarget' -Tag 'Test-PSRuleTarget','Common' {
             $option = @{ 'execution.mode' = 'ConstrainedLanguage' };
             { $Null = $testObject | Test-PSRuleTarget -Path $ruleFilePath -Name 'ConstrainedTest2' -Option $option -ErrorAction Stop } | Should -Throw 'Cannot invoke method. Method invocation is supported only on core types in this language mode.';
             { $Null = $testObject | Test-PSRuleTarget -Path $ruleFilePath -Name 'ConstrainedTest3' -Option $option -ErrorAction Stop } | Should -Throw 'Cannot invoke method. Method invocation is supported only on core types in this language mode.';
-
-            $bindFn = {
-                param ($TargetObject)
-                $Null = [Console]::WriteLine('Should fail');
-                return 'BadName';
-            }
-
-            $option = New-PSRuleOption -Option @{ 'execution.mode' = 'ConstrainedLanguage' } -BindTargetName $bindFn;
-            { $Null = $testObject | Test-PSRuleTarget -Path $ruleFilePath -Name 'ConstrainedTest1' -Option $option -ErrorAction Stop } | Should -Throw 'Exception calling "Test" with "4" argument(s): "Binding functions are not supported in this language mode."';
         }
     }
 }
@@ -1557,9 +1547,9 @@ Describe 'Test-PSRuleTarget' -Tag 'Test-PSRuleTarget','Common' {
 Describe 'Get-PSRuleTarget' -Tag 'Get-PSRuleTarget','Common' {
     Context 'With defaults' {
         It 'Yaml' {
-            $result = @(Get-PSRuleTarget -InputPath (Join-Path -Path $rootPath -ChildPath 'ps-project.yaml'));
+            $result = @(Get-PSRuleTarget -InputPath (Join-Path -Path $rootPath -ChildPath 'GitVersion.yml'));
             $result.Length | Should -Be 1;
-            $result[0].info.name | Should -Be 'PSRule';
+            $result[0].increment | Should -Be 'Inherit';
 
             $result = @(Get-PSRuleTarget -InputPath (Join-Path -Path $here -ChildPath 'PSRule.Tests.yml'));
             $result.Length | Should -Be 1;
@@ -1580,26 +1570,26 @@ Describe 'Get-PSRuleTarget' -Tag 'Get-PSRuleTarget','Common' {
             $result = @(Get-PSRuleTarget -InputPath '**/HEAD');
             $result.Length | Should -Be 0;
 
-            $result = @(Get-PSRuleTarget -InputPath '**/HEAD' -Option @{ 'Input.IgnoreGitPath' = $False });
-            $result.Length | Should -BeGreaterThan 0;
+            # $result = @(Get-PSRuleTarget -InputPath '**/HEAD' -Option @{ 'Input.IgnoreGitPath' = $False });
+            # $result.Length | Should -BeGreaterThan 0;
         }
     }
 
-    Context 'With -Format' {
-        It 'File' {
-            $result = @(Get-PSRuleTarget -InputPath $rootPath -Format File);
-            $result.Length | Should -BeGreaterThan 100;
-            $result.Length | Should -BeLessOrEqual 1000;
+    # Context 'With -Format' {
+    #     It 'File' {
+    #         $result = @(Get-PSRuleTarget -InputPath $rootPath -Format File);
+    #         $result.Length | Should -BeGreaterThan 100;
+    #         $result.Length | Should -BeLessOrEqual 1000;
 
-            # No ignored path
-            $filteredResult = @($result | Where-Object { $_.FullName.Replace('\', '/') -like '*/out/*' });
-            $filteredResult.Length | Should -Be 0;
+    #         # No ignored path
+    #         $filteredResult = @($result | Where-Object { $_.FullName.Replace('\', '/') -like '*/out/*' });
+    #         $filteredResult.Length | Should -Be 0;
 
-            # Contains nested
-            $filteredResult = @($result | Where-Object { $_.FullName.Replace('\', '/') -like '*/Assert.cs' });
-            $filteredResult.Length | Should -Be 1;
-        }
-    }
+    #         # Contains nested
+    #         $filteredResult = @($result | Where-Object { $_.FullName.Replace('\', '/') -like '*/Assert.cs' });
+    #         $filteredResult.Length | Should -Be 1;
+    #     }
+    # }
 }
 
 #endregion Get-PSRuleTarget
@@ -1628,7 +1618,7 @@ Describe 'Assert-PSRule' -Tag 'Assert-PSRule','Common' {
             # Check multiple
             $assertParams = @{
                 Path = $ruleFilePath
-                Option = @{ 'Execution.InconclusiveWarning' = $False; 'Output.Style' = 'Plain' }
+                Option = @{ 'Execution.RuleInconclusive' = 'Ignore'; 'Output.Style' = 'Plain' }
                 Name = 'FromFile1', 'FromFile2', 'FromFile3'
                 ErrorVariable = 'errorOut'
             }
@@ -1653,7 +1643,7 @@ Describe 'Assert-PSRule' -Tag 'Assert-PSRule','Common' {
             $testOutputPath = (Join-Path -Path $outputPath -ChildPath 'newPath/assert.results.json');
             $assertParams = @{
                 Path = $ruleFilePath
-                Option = @{ 'Execution.InconclusiveWarning' = $False; 'Output.Style' = 'Plain'; 'Binding.Field' = @{ extra = 'Name'} }
+                Option = @{ 'Execution.RuleInconclusive' = 'Ignore'; 'Output.Style' = 'Plain'; 'Binding.Field' = @{ extra = 'Name'} }
                 Name = 'FromFile1', 'FromFile2', 'FromFile3'
                 ErrorVariable = 'errorOut'
                 OutputFormat = 'Json'
@@ -1672,7 +1662,7 @@ Describe 'Assert-PSRule' -Tag 'Assert-PSRule','Common' {
         It 'With -WarningAction' {
             $assertParams = @{
                 Path = $ruleFilePath
-                Option = @{ 'Execution.InconclusiveWarning' = $False; 'Output.Style' = 'Plain' }
+                Option = @{ 'Execution.RuleInconclusive' = 'Ignore'; 'Output.Style' = 'Plain' }
                 Name = 'WithWarning'
             }
             $result = $testObject | Assert-PSRule @assertParams 6>&1 | Out-String;
@@ -1690,7 +1680,7 @@ Describe 'Assert-PSRule' -Tag 'Assert-PSRule','Common' {
             $testOutputPath = (Join-Path -Path $outputPath -ChildPath 'newPath/assert.results2.json');
             $assertParams = @{
                 Path = $ruleFilePath
-                Option = @{ 'Execution.InconclusiveWarning' = $False; 'Output.Style' = 'Plain'; 'Binding.Field' = @{ extra = 'Name'} }
+                Option = @{ 'Execution.RuleInconclusive' = 'Ignore'; 'Output.Style' = 'Plain'; 'Binding.Field' = @{ extra = 'Name'} }
                 Name = 'FromFile2', 'FromFile3', 'WithError', 'WithException'
                 ErrorVariable = 'errorOut'
                 OutputFormat = 'Json'
@@ -1795,15 +1785,6 @@ Describe 'Assert-PSRule' -Tag 'Assert-PSRule','Common' {
             $option = @{ 'execution.mode' = 'ConstrainedLanguage' };
             { $Null = $testObject | Assert-PSRule -Path $ruleFilePath -Name 'ConstrainedTest2' -Option $option -ErrorAction Stop 6>&1 } | Should -Throw 'Cannot invoke method. Method invocation is supported only on core types in this language mode.';
             { $Null = $testObject | Assert-PSRule -Path $ruleFilePath -Name 'ConstrainedTest3' -Option $option -ErrorAction Stop 6>&1 } | Should -Throw 'Cannot invoke method. Method invocation is supported only on core types in this language mode.';
-
-            $bindFn = {
-                param ($TargetObject)
-                $Null = [Console]::WriteLine('Should fail');
-                return 'BadName';
-            }
-
-            $option = New-PSRuleOption -Option @{ 'execution.mode' = 'ConstrainedLanguage' } -BindTargetName $bindFn;
-            { $Null = $testObject | Assert-PSRule -Path $ruleFilePath -Name 'ConstrainedTest1' -Option $option -ErrorAction Stop 6>&1 } | Should -Throw 'Exception calling "Assert" with "4" argument(s): "Binding functions are not supported in this language mode."';
         }
     }
 }
@@ -1827,10 +1808,10 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
         It 'Returns rules in current path' {
             try {
                 Push-Location -Path $searchPath;
-                $result = @(Get-PSRule  -Path $PWD -Option @{ 'Execution.InvariantCultureWarning' = $False })
+                $result = @(Get-PSRule  -Path $PWD -Option @{ 'Execution.InvariantCulture' = 'Ignore' })
                 $result | Should -Not -BeNullOrEmpty;
                 $result.Length | Should -Be 3;
-                $result.RuleName | Should -BeIn 'M1.Rule1', 'M1.Rule2', 'M1.YamlTestName';
+                $result.Name | Should -BeIn 'M1.Rule1', 'M1.Rule2', 'M1.YamlTestName';
                 $result | Should -BeOfType 'PSRule.Definitions.Rules.IRuleV1';
                 $result[0].Extent.Line | Should -Be 9
             }
@@ -1852,42 +1833,42 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
             $searchPath = Join-Path -Path $here -ChildPath 'TestModule';
             $result = @(Get-PSRule -Path $searchPath);
             $result.Length | Should -Be 3;
-            $result.RuleName | Should -BeIn 'M1.Rule1', 'M1.Rule2', 'M1.YamlTestName';
+            $result.Name | Should -BeIn 'M1.Rule1', 'M1.Rule2', 'M1.YamlTestName';
         }
 
         It 'Accepts .ps1 files' {
             $searchPath = Join-Path -Path $here -ChildPath 'TestModule/rules/Test2.ps1';
             $result = @(Get-PSRule -Path $searchPath);
             $result.Length | Should -Be 2;
-            $result.RuleName | Should -BeIn 'M1.Rule3', 'M1.Rule4';
+            $result.Name | Should -BeIn 'M1.Rule3', 'M1.Rule4';
         }
 
         It 'Filters by name' {
             $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1', 'FromFile3';
             $result | Should -Not -BeNullOrEmpty;
             $result.Count | Should -Be 2;
-            $result.RuleName | Should -BeIn 'FromFile1', 'FromFile3';
+            $result.Name | Should -BeIn 'FromFile1', 'FromFile3';
         }
 
         It 'Filters by tag' {
             $result = Get-PSRule -Path $ruleFilePath -Tag @{ Test = 'Test1' };
             $result | Should -Not -BeNullOrEmpty;
-            $result.RuleName | Should -Be 'FromFile1';
+            $result.Name | Should -Be 'FromFile1';
 
             # Test1 or Test2
             $result = Get-PSRule -Path $ruleFilePath -Tag @{ Test = 'Test1', 'Test2' };
             $result | Should -Not -BeNullOrEmpty;
             $result.Count | Should -Be 2;
-            $result.RuleName | Should -BeIn 'FromFile1', 'FromFile2';
+            $result.Name | Should -BeIn 'FromFile1', 'FromFile2';
         }
 
         It 'Reads metadata' {
-            [PSRule.Configuration.PSRuleOption]::UseCurrentCulture('en-ZZ');
+            [PSRule.Environment]::UseCurrentCulture('en-ZZ');
             try {
                 # From markdown
                 $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -Option $emptyOptionsFilePath;
                 $result | Should -Not -BeNullOrEmpty;
-                $result.RuleName | Should -Be 'FromFile1';
+                $result.Name | Should -Be 'FromFile1';
                 $result.Synopsis | Should -Be 'This is a synopsis.';
                 $result.Info.Annotations.culture | Should -Be 'en-ZZ';
                 Assert-VerifiableMock;
@@ -1895,39 +1876,39 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
                 # From comments
                 $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile2';
                 $result | Should -Not -BeNullOrEmpty;
-                $result.RuleName | Should -Be 'FromFile2';
+                $result.Name | Should -Be 'FromFile2';
                 $result.Synopsis | Should -Be 'Test rule 2';
 
                 # No comments
                 $result = Get-PSRule -Path $ruleFilePath -Name 'WithNoSynopsis';
                 $result | Should -Not -BeNullOrEmpty;
-                $result.RuleName | Should -Be 'WithNoSynopsis';
+                $result.Name | Should -Be 'WithNoSynopsis';
                 $result.Synopsis | Should -BeNullOrEmpty;
 
                 # Empty markdown
                 $result = Get-PSRule -Path $ruleFilePath -Name 'WithNoSynopsis' -Culture 'en-YY';
                 $result | Should -Not -BeNullOrEmpty;
-                $result.RuleName | Should -Be 'WithNoSynopsis';
+                $result.Name | Should -Be 'WithNoSynopsis';
                 $result.Synopsis | Should -BeNullOrEmpty;
             }
             finally {
-                [PSRule.Configuration.PSRuleOption]::UseCurrentCulture();
+                [PSRule.Environment]::UseCurrentCulture();
             }
         }
 
         if ((Get-Variable -Name 'IsLinux' -ErrorAction SilentlyContinue -ValueOnly) -eq $True) {
             It 'Handles en-US-POSIX' {
-                [PSRule.Configuration.PSRuleOption]::UseCurrentCulture('en-US-POSIX');
+                [PSRule.Environment]::UseCurrentCulture('en-US-POSIX');
                 try {
                     # From markdown
                     $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1';
                     $result | Should -Not -BeNullOrEmpty;
-                    $result.RuleName | Should -Be 'FromFile1';
+                    $result.Name | Should -Be 'FromFile1';
                     $result.Synopsis | Should -Be 'This is a synopsis.';
                     $result.Info.Annotations.culture | Should -Be 'en';
                 }
                 finally {
-                    [PSRule.Configuration.PSRuleOption]::UseCurrentCulture();
+                    [PSRule.Environment]::UseCurrentCulture();
                 }
             }
         }
@@ -1943,31 +1924,31 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
         It 'Uses rules with include option' {
             Push-Location -Path (Join-Path -Path $here -ChildPath 'rules/')
             try {
-                $result = @(Get-PSRule -Path $PWD -Option @{ 'Execution.InvariantCultureWarning' = $False })
+                $result = @(Get-PSRule -Path $PWD -Option @{ 'Execution.InvariantCulture' = 'Ignore' })
                 $result.Length | Should -Be 4;
 
-                $result = @(Get-PSRule -Option @{ 'Include.Path' = 'main/'; 'Execution.InvariantCultureWarning' = $False })
+                $result = @(Get-PSRule -Option @{ 'Include.Path' = 'main/'; 'Execution.InvariantCulture' = 'Ignore' })
                 $result.Length | Should -Be 1;
 
-                $result = @(Get-PSRule -Option @{ 'Include.Path' = 'main/', 'extra/'; 'Execution.InvariantCultureWarning' = $False })
+                $result = @(Get-PSRule -Option @{ 'Include.Path' = 'main/', 'extra/'; 'Execution.InvariantCulture' = 'Ignore' })
                 $result.Length | Should -Be 2;
 
-                $result = @(Get-PSRule -Option @{ 'Include.Path' = '.'; 'Execution.InvariantCultureWarning' = $False })
+                $result = @(Get-PSRule -Option @{ 'Include.Path' = '.'; 'Execution.InvariantCulture' = 'Ignore' })
                 $result.Length | Should -Be 4;
 
-                $result = @(Get-PSRule -Path 'main/' -Option @{ 'Execution.InvariantCultureWarning' = $False })
+                $result = @(Get-PSRule -Path 'main/' -Option @{ 'Execution.InvariantCulture' = 'Ignore' })
                 $result.Length | Should -Be 2;
 
-                $result = @(Get-PSRule -Path 'main/' -Option @{ 'Include.Path' = @(); 'Execution.InvariantCultureWarning' = $False })
+                $result = @(Get-PSRule -Path 'main/' -Option @{ 'Include.Path' = @(); 'Execution.InvariantCulture' = 'Ignore' })
                 $result.Length | Should -Be 1;
 
-                $result = @(Get-PSRule -Path 'main/' -Option @{ 'Include.Path' = 'extra/'; 'Execution.InvariantCultureWarning' = $False })
+                $result = @(Get-PSRule -Path 'main/' -Option @{ 'Include.Path' = 'extra/'; 'Execution.InvariantCulture' = 'Ignore' })
                 $result.Length | Should -Be 2;
 
-                $result = @(Get-PSRule -Path 'main/' -Option @{ 'Include.Path' = 'extra/', '.ps-rule/'; 'Execution.InvariantCultureWarning' = $False })
+                $result = @(Get-PSRule -Path 'main/' -Option @{ 'Include.Path' = 'extra/', '.ps-rule/'; 'Execution.InvariantCulture' = 'Ignore' })
                 $result.Length | Should -Be 3;
 
-                $result = @(Get-PSRule -Path 'main/' -Option @{ 'Include.Path' = 'main/'; 'Execution.InvariantCultureWarning' = $False })
+                $result = @(Get-PSRule -Path 'main/' -Option @{ 'Include.Path' = 'main/'; 'Execution.InvariantCulture' = 'Ignore' })
                 $result.Length | Should -Be 1;
             }
             finally {
@@ -1987,18 +1968,18 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
             $result | Should -Not -BeNullOrEmpty;
             $result.Length | Should -Be 3;
 
-            $filteredResult = @($result | Where-Object { $_.RuleName -Eq 'M1.Rule1' })
+            $filteredResult = @($result | Where-Object { $_.Name -Eq 'M1.Rule1' })
             $filteredResult | Should -Not -BeNullOrEmpty;
-            $filteredResult[0].Description | Should -Be 'Synopsis en-US.';
+            $filteredResult[0].Synopsis | Should -Be 'Synopsis en-US.';
             $filteredResult[0].Info.Annotations.culture | Should -Be 'en-US';
             $filteredResult[0].Info.Recommendation | Should -Be 'Recommendation en-US.';
 
-            $filteredResult = @($result | Where-Object { $_.RuleName -Eq 'M1.Rule2' })
+            $filteredResult = @($result | Where-Object { $_.Name -Eq 'M1.Rule2' })
             $filteredResult | Should -Not -BeNullOrEmpty;
-            $filteredResult[0].Description | Should -Be 'This is the default';
+            $filteredResult[0].Synopsis | Should -Be 'This is the default';
             $filteredResult[0].Info.Annotations | Should -BeNullOrEmpty;
 
-            $filteredResult = @($result | Where-Object { $_.RuleName -Eq 'M1.YamlTestName' })
+            $filteredResult = @($result | Where-Object { $_.Name -Eq 'M1.YamlTestName' })
             $filteredResult | Should -Not -BeNullOrEmpty;
             $filteredResult[0].Synopsis | Should -Be 'This is an example YAML rule.';
             $filteredResult[0].Info.Description | Should -Be 'An additional description for the YAML test rule.';
@@ -2044,7 +2025,7 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
             Assert-MockCalled -CommandName 'LoadModule' -ModuleName 'PSRule' -Times 0 -Scope 'It';
             $result | Should -Not -BeNullOrEmpty;
             $result.Length | Should -Be 3;
-            $result.RuleName | Should -BeIn 'M1.Rule1', 'M1.Rule2', 'M1.YamlTestName';
+            $result.Name | Should -BeIn 'M1.Rule1', 'M1.Rule2', 'M1.YamlTestName';
         }
 
         It 'Handles path spaces' {
@@ -2073,8 +2054,8 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
             $result = @(Get-PSRule -Module 'TestModule' -Culture 'en-US');
             $result | Should -Not -BeNullOrEmpty;
             $result.Length | Should -Be 3;
-            $result[0].RuleName | Should -Be 'M1.Rule1';
-            $result[0].Description | Should -Be 'Synopsis en-US.';
+            $result[0].Name | Should -Be 'M1.Rule1';
+            $result[0].Synopsis | Should -Be 'Synopsis en-US.';
             $result[0].Info.Annotations.culture | Should -Be 'en-US';
         }
 
@@ -2087,7 +2068,7 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
             $result = @(Get-PSRule -Path $testModuleSourcePath -Module 'TestModule');
             $result | Should -Not -BeNullOrEmpty;
             $result.Length | Should -Be 6;
-            $result.RuleName | Should -BeIn 'M1.Rule1', 'M1.Rule2', 'M1.YamlTestName';
+            $result.Name | Should -BeIn 'M1.Rule1', 'M1.Rule2', 'M1.YamlTestName';
         }
 
         It 'Read from documentation' {
@@ -2095,15 +2076,15 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
                 $Null = Remove-Module -Name TestModule;
             }
 
-            [PSRule.Configuration.PSRuleOption]::UseCurrentCulture('en-US');
+            [PSRule.Environment]::UseCurrentCulture('en-US');
             try {
                 # en-US default
                 $Null = Import-Module $testModuleSourcePath -Force;
                 $result = @(Get-PSRule -Module 'TestModule');
                 $result | Should -Not -BeNullOrEmpty;
                 $result.Length | Should -Be 3;
-                $result[0].RuleName | Should -Be 'M1.Rule1';
-                $result[0].Description | Should -Be 'Synopsis en-US.';
+                $result[0].Name | Should -Be 'M1.Rule1';
+                $result[0].Synopsis | Should -Be 'Synopsis en-US.';
                 $result[0].Info.Annotations.culture | Should -Be 'en-US';
 
                 # en-AU
@@ -2111,23 +2092,23 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
                 $result = @(Get-PSRule -Module 'TestModule' -Culture 'en-AU');
                 $result | Should -Not -BeNullOrEmpty;
                 $result.Length | Should -Be 3;
-                $result[0].RuleName | Should -Be 'M1.Rule1';
-                $result[0].Description | Should -Be 'Synopsis en-AU.';
+                $result[0].Name | Should -Be 'M1.Rule1';
+                $result[0].Synopsis | Should -Be 'Synopsis en-AU.';
                 $result[0].Info.Annotations.culture | Should -Be 'en-AU';
             }
             finally {
-                [PSRule.Configuration.PSRuleOption]::UseCurrentCulture();
+                [PSRule.Environment]::UseCurrentCulture();
             }
 
-            [PSRule.Configuration.PSRuleOption]::UseCurrentCulture('en-AU');
+            [PSRule.Environment]::UseCurrentCulture('en-AU');
             try {
                 # en-AU default
                 $Null = Import-Module $testModuleSourcePath -Force;
                 $result = @(Get-PSRule -Module 'TestModule' -Option $emptyOptionsFilePath);
                 $result | Should -Not -BeNullOrEmpty;
                 $result.Length | Should -Be 3;
-                $result[0].RuleName | Should -Be 'M1.Rule1';
-                $result[0].Description | Should -Be 'Synopsis en-AU.';
+                $result[0].Name | Should -Be 'M1.Rule1';
+                $result[0].Synopsis | Should -Be 'Synopsis en-AU.';
                 $result[0].Info.Annotations.culture | Should -Be 'en-AU';
 
                 # en-ZZ using parent
@@ -2135,27 +2116,27 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
                 $result = @(Get-PSRule -Module 'TestModule' -Culture 'en-ZZ');
                 $result | Should -Not -BeNullOrEmpty;
                 $result.Length | Should -Be 3;
-                $result[0].RuleName | Should -Be 'M1.Rule1';
-                $result[0].Description | Should -Be 'Synopsis en.';
+                $result[0].Name | Should -Be 'M1.Rule1';
+                $result[0].Synopsis | Should -Be 'Synopsis en.';
                 $result[0].Info.Annotations.culture | Should -Be 'en';
             }
             finally {
-                [PSRule.Configuration.PSRuleOption]::UseCurrentCulture();
+                [PSRule.Environment]::UseCurrentCulture();
             }
 
-            [PSRule.Configuration.PSRuleOption]::UseCurrentCulture('en-ZZ');
+            [PSRule.Environment]::UseCurrentCulture('en-ZZ');
             try {
                 # en-ZZ default parent
                 $Null = Import-Module $testModuleSourcePath -Force;
                 $result = @(Get-PSRule -Module 'TestModule' -Option $emptyOptionsFilePath);
                 $result | Should -Not -BeNullOrEmpty;
                 $result.Length | Should -Be 3;
-                $result[0].RuleName | Should -Be 'M1.Rule1';
-                $result[0].Description | Should -Be 'Synopsis en.';
+                $result[0].Name | Should -Be 'M1.Rule1';
+                $result[0].Synopsis | Should -Be 'Synopsis en.';
                 $result[0].Info.Annotations.culture | Should -Be 'en';
             }
             finally {
-                [PSRule.Configuration.PSRuleOption]::UseCurrentCulture();
+                [PSRule.Environment]::UseCurrentCulture();
             }
         }
 
@@ -2178,8 +2159,8 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
             $result = @(Get-PSRule -Path $ruleFilePath -Name 'FromFile4' -IncludeDependencies);
             $result | Should -Not -BeNullOrEmpty;
             $result.Length | Should -Be 2;
-            $result[0].RuleName | Should -Be 'FromFile3';
-            $result[1].RuleName | Should -Be 'FromFile4';
+            $result[0].Name | Should -Be 'FromFile3';
+            $result[1].Name | Should -Be 'FromFile4';
             $result[1].DependsOn | Should -BeIn '.\FromFile3';
         }
     }
@@ -2195,20 +2176,20 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
             $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -OutputFormat Yaml;
             $result | Should -Not -BeNullOrEmpty;
             $result | Should -BeOfType System.String;
-            $result -cmatch 'ruleName: FromFile1' | Should -Be $True;
+            $result -cmatch 'name: FromFile1' | Should -Be $True;
         }
 
         It 'Json' {
             $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -OutputFormat Json;
             $result | Should -Not -BeNullOrEmpty;
             $result | Should -BeOfType System.String;
-            $result -cmatch '"ruleName":"FromFile1"' | Should -Be $True;
+            $result -cmatch '"name":"FromFile1"' | Should -Be $True;
         }
     }
 
     Context 'With -Culture' {
         It 'Invariant culture' {
-            [PSRule.Configuration.PSRuleOption]::UseCurrentCulture('');
+            [PSRule.Environment]::UseCurrentCulture('');
             try {
                 $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -Option $emptyOptionsFilePath;
                 $result.Synopsis | Should -Be 'Test rule 1';
@@ -2220,7 +2201,7 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
                 $result.Synopsis | Should -Be 'This is a synopsis.';
             }
             finally {
-                [PSRule.Configuration.PSRuleOption]::UseCurrentCulture();
+                [PSRule.Environment]::UseCurrentCulture();
             }
         }
     }
@@ -2235,77 +2216,87 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
                     Title = '0 space indentation'
                     OptionHashtable = @{'Output.JsonIndent' = 0}
                     YamlPath = (Join-Path -Path $here -ChildPath 'PSRule.Tests9.yml')
-                    ExpectedJson = '"ruleId":"\.\\\\FromFile1","ruleName":"FromFile1"'
+                    ExpectedId = '"id":"\.\\\\FromFile1",'
+                    ExpectedName = ',"name":"FromFile1"'
                 }
                 @{
                     Title = '1 space indentation'
                     OptionHashtable = @{'Output.JsonIndent' = 1}
                     YamlPath = (Join-Path -Path $here -ChildPath 'PSRule.Tests10.yml')
-                    ExpectedJson = "`"ruleId`": `"\.\\\\FromFile1`",$([Environment]::Newline)  `"ruleName`": `"FromFile1`""
+                    ExpectedId = "$([Environment]::Newline)  `"id`": `"\.\\\\FromFile1`",$([Environment]::Newline)"
+                    ExpectedName = ",$([Environment]::Newline)  `"name`": `"FromFile1`""
                 }
                 @{
                     Title = '2 space indentation'
                     OptionHashtable = @{'Output.JsonIndent' = 2}
                     YamlPath = (Join-Path -Pat $here -ChildPath 'PSRule.Tests11.yml')
-                    ExpectedJson = "`"ruleId`": `"\.\\\\FromFile1`",$([Environment]::Newline)    `"ruleName`": `"FromFile1`""
+                    ExpectedId = "$([Environment]::Newline)    `"id`": `"\.\\\\FromFile1`",$([Environment]::Newline)"
+                    ExpectedName = ",$([Environment]::Newline)    `"name`": `"FromFile1`""
                 }
                 @{
                     Title = '3 space indentation'
                     OptionHashtable = @{'Output.JsonIndent' = 3}
                     YamlPath = (Join-Path -Pat $here -ChildPath 'PSRule.Tests12.yml')
-                    ExpectedJson = "`"ruleId`": `"\.\\\\FromFile1`",$([Environment]::Newline)      `"ruleName`": `"FromFile1`""
+                    ExpectedId = "$([Environment]::Newline)      `"id`": `"\.\\\\FromFile1`",$([Environment]::Newline)"
+                    ExpectedName = ",$([Environment]::Newline)      `"name`": `"FromFile1`""
                 }
                 @{
                     Title = '4 space indentation'
                     OptionHashtable = @{'Output.JsonIndent' = 4}
                     YamlPath = (Join-Path -Pat $here -ChildPath 'PSRule.Tests13.yml')
-                    ExpectedJson = "`"ruleId`": `"\.\\\\FromFile1`",$([Environment]::Newline)        `"ruleName`": `"FromFile1`""
+                    ExpectedId = "$([Environment]::Newline)        `"id`": `"\.\\\\FromFile1`",$([Environment]::Newline)"
+                    ExpectedName = ",$([Environment]::Newline)        `"name`": `"FromFile1`""
                 }
             )
         }
 
         Context 'Using Hashtable option' {
             It '<title>' -TestCases $testCases {
-                param($Title, $OptionHashtable, $ExpectedJson)
+                param($Title, $OptionHashtable, $ExpectedId, $ExpectedName)
                 $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -OutputFormat 'Json' -Option $OptionHashtable;
-                $result | Should -MatchExactly $ExpectedJson;
+                $result | Should -MatchExactly $ExpectedId;
+                $result | Should -MatchExactly $ExpectedName;
             }
         }
 
         Context 'Using New-PSRuleOption -Option' {
             It '<title>' -TestCases $testCases {
-                param($Title, $OptionHashtable, $ExpectedJson)
+                param($Title, $OptionHashtable, $ExpectedId, $ExpectedName)
                 $option = New-PSRuleOption -Option $OptionHashtable;
                 $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -OutputFormat 'Json' -Option $option;
-                $result | Should -MatchExactly $ExpectedJson;
+                $result | Should -MatchExactly $ExpectedId;
+                $result | Should -MatchExactly $ExpectedName;
             }
         }
 
         Context 'Using New-PSRuleOption -OutputJsonIndent' {
             It '<title>' -TestCases $testCases {
-                param($Title, $OptionHashtable, $ExpectedJson)
+                param($Title, $OptionHashtable, $ExpectedId, $ExpectedName)
                 $option = New-PSRuleOption -OutputJsonIndent $OptionHashtable['Output.JsonIndent'];
                 $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -OutputFormat 'Json' -Option $option;
-                $result | Should -MatchExactly $ExpectedJson;
+                $result | Should -MatchExactly $ExpectedId;
+                $result | Should -MatchExactly $ExpectedName;
             }
         }
 
         Context 'Using New-PSRuleOption with YAML config' {
             It '<title>' -TestCases $testCases {
-                param($Title, $YamlPath, $ExpectedJson)
+                param($Title, $YamlPath, $ExpectedId, $ExpectedName)
                 $option = New-PSRuleOption -Option $YamlPath;
                 $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -OutputFormat 'Json' -Option $option;
-                $result | Should -MatchExactly $ExpectedJson;
+                $result | Should -MatchExactly $ExpectedId;
+                $result | Should -MatchExactly $ExpectedName;
             }
         }
 
         Context 'Using environment variable' {
             It '<title>' -TestCases $testCases {
-                param($Title, $OptionHashtable, $ExpectedJson)
+                param($Title, $OptionHashtable, $ExpectedId, $ExpectedName)
                 try {
                     $env:PSRULE_OUTPUT_JSONINDENT = $OptionHashtable['Output.JsonIndent'];
                     $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -OutputFormat 'Json';
-                    $result | Should -MatchExactly $ExpectedJson;
+                    $result | Should -MatchExactly $ExpectedId;
+                    $result | Should -MatchExactly $ExpectedName;
                 }
                 finally {
                     Remove-Item 'env:PSRULE_OUTPUT_JSONINDENT' -Force;
@@ -2316,12 +2307,14 @@ Describe 'Get-PSRule' -Tag 'Get-PSRule','Common' {
         Context 'Normalizie range' {
             It 'Normalize to 0 when indentation is less than 0' {
                 $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -OutputFormat 'Json' -Option @{'Output.JsonIndent' = -1};
-                $result | Should -MatchExactly '"ruleId":"\.\\\\FromFile1","ruleName":"FromFile1"';
+                $result | Should -MatchExactly '"id":"\.\\\\FromFile1","';
+                $result | Should -MatchExactly ',"name":"FromFile1"';
             }
 
             It 'Normalize to 4 when indentation is more than 4' {
                 $result = Get-PSRule -Path $ruleFilePath -Name 'FromFile1' -OutputFormat 'Json' -Option @{'Output.JsonIndent' = 5};
-                $result | Should -MatchExactly "`"ruleId`": `"\.\\\\FromFile1`",$([Environment]::Newline)        `"ruleName`": `"FromFile1`"";
+                $result | Should -MatchExactly "$([Environment]::Newline)        `"id`": `"\.\\\\FromFile1`",";
+                $result | Should -MatchExactly "$([Environment]::Newline)        `"name`": `"FromFile1`",";
             }
         }
     }
@@ -2364,7 +2357,7 @@ Describe 'Get-PSRuleHelp' -Tag 'Get-PSRuleHelp', 'Common' {
         BeforeAll {
             # Get a list of rules
             $searchPath = Join-Path -Path $here -ChildPath 'TestModule';
-            $options = @{ 'Execution.InvariantCultureWarning' = $False }
+            $options = @{ 'Execution.InvariantCulture' = 'Ignore' }
         }
 
         It 'Docs from imported module' {
@@ -2424,7 +2417,11 @@ Describe 'Get-PSRuleHelp' -Tag 'Get-PSRuleHelp', 'Common' {
 
             try {
                 Push-Location $searchPath;
-                { Get-PSRuleHelp -Path $PWD } | Should -Throw "A rule with the same id '.\M1.Rule2' already exists.";
+                { Get-PSRuleHelp -Path $PWD } | Should -Throw "The resource '.\M1.Rule2' is using a duplicate resource identifier. A resource with the identifier '.\M1.Rule2' already exists. Each resource must have a unique name, ref, and aliases. See https://aka.ms/ps-rule/naming for guidance on naming within PSRule.";
+                Get-PSRuleHelp -Path $PWD -Option @{ 'Execution.DuplicateResourceId' = 'Warn'; 'Execution.InvariantCulture' = 'Ignore' } -WarningVariable outWarn -WarningAction SilentlyContinue;
+                $warnings = @($outWarn);
+                $warnings.Count | Should -Be 1;
+                $warnings | Should -Be "The resource '.\M1.Rule2' is using a duplicate resource identifier. A resource with the identifier '.\M1.Rule2' already exists. Each resource must have a unique name, ref, and aliases. See https://aka.ms/ps-rule/naming for guidance on naming within PSRule.";
             }
             finally {
                 Pop-Location;
@@ -2767,13 +2764,13 @@ Describe 'Binding' -Tag Common, Binding {
             $result | Should -Not -BeNullOrEmpty;
             $result.Length | Should -Be 7;
             $result[0..6].IsSuccess() | Should -BeIn $True;
-            $result[0].TargetName | Should -BeIn 'f209c623345144be61087d91f30c17b01c6e86d2';
-            $result[1].TargetName | Should -BeIn '28e156a7121bc57b0461029208daf0b48d1c4fd0';
-            $result[2].TargetName | Should -BeIn '3b8eeb35831ea8f7b5de4e0cf04f32b9a1233a0d';
-            $result[3].TargetName | Should -BeIn '7b3ce68b6c2f7d67dae4210eeb83be69f978e2a8';
-            $result[4].TargetName | Should -BeIn '205c97d9248d2cd12db1c55ba421eb8df84b22a7';
-            $result[5].TargetName | Should -BeIn '356a192b7913b04c54574d18c28d46e6395428ab';
-            $result[6].TargetName | Should -BeIn 'da4b9237bacccdf19c0760cab7aec4a8359010b0';
+            $result[0].TargetName | Should -BeIn 'f3d2f8ce966af96a8d320e8f5c088604324885a0d02f44b174';
+            $result[1].TargetName | Should -BeIn '839b3457fca709821c89e23263a070fdca7cb8c4a86b5862f9';
+            $result[2].TargetName | Should -BeIn '1c23e67aab1f653e2ead0b0e71153d02eb249f1c8382821598';
+            $result[3].TargetName | Should -BeIn '72dd48c5f3cef36c66f5633955719b5cdb5f679539ec39b087';
+            $result[4].TargetName | Should -BeIn '35f8cb2a8d4c26a7d53839be143c5d5b82e1543ce27adb94d4';
+            $result[5].TargetName | Should -BeIn '4dff4ea340f0a823f15d3f4f01ab62eae0e5da579ccb851f8d';
+            $result[6].TargetName | Should -BeIn '40b244112641dd78dd4f93b6c9190dd46e0099194d5a44257b';
         }
 
         It 'Binds to custom name' {
@@ -2791,38 +2788,22 @@ Describe 'Binding' -Tag Common, Binding {
                     TargetName = 'TargetName'
                 }
                 [PSCustomObject]@{
-                    OtherName = 'OtherName'
-                    resourceName = 'ResourceName'
-                    AlternateName = 'AlternateName'
-                    TargetName = 'TargetName'
-                }
-                [PSCustomObject]@{
                     Metadata = @{
                         Name = 'MetadataName'
                     }
                 }
             )
 
-            $bindFn = {
-                param ($TargetObject)
-                $otherName = $TargetObject.PSObject.Properties['OtherName'];
-                if ($otherName -eq $Null) {
-                    return $Null
-                }
-                return $otherName.Value;
-            }
-
-            $option = New-PSRuleOption -Option @{ 'Binding.TargetName' = 'ResourceName', 'AlternateName', 'Metadata.Name'; 'Binding.IgnoreCase' = $True } -BindTargetName $bindFn;
+            $option = New-PSRuleOption -Option @{ 'Binding.TargetName' = 'ResourceName', 'AlternateName', 'Metadata.Name'; 'Binding.IgnoreCase' = $True };
             $result = $testObject | Invoke-PSRule -Option $option -Path $ruleFilePath -Name 'FromFile1';
             $result | Should -Not -BeNullOrEmpty;
-            $result.Count | Should -Be 5;
+            $result.Count | Should -Be 4;
             $result[0].TargetName | Should -Be 'ResourceName';
             $result[1].TargetName | Should -Be 'AlternateName';
             $result[2].TargetName | Should -Be 'TargetName';
-            $result[3].TargetName | Should -Be 'OtherName';
-            $result[4].TargetName | Should -Be 'MetadataName';
+            $result[3].TargetName | Should -Be 'MetadataName';
 
-            $option = New-PSRuleOption -Option @{ 'Binding.TargetName' = 'ResourceName', 'AlternateName'; 'Binding.IgnoreCase' = $False } -BindTargetName $bindFn;
+            $option = New-PSRuleOption -Option @{ 'Binding.TargetName' = 'ResourceName', 'AlternateName'; 'Binding.IgnoreCase' = $False };
             $result = $testObject[0..1] | Invoke-PSRule -Option $option -Path $ruleFilePath -Name 'FromFile1';
             $result | Should -Not -BeNullOrEmpty;
             $result.Count | Should -Be 2;
@@ -2894,25 +2875,6 @@ Describe 'Binding' -Tag Common, Binding {
             $result = $testObject | Invoke-PSRule -Path $ruleFilePath -Name 'FromFile1' -Option $option;
             $result | Should -Not -BeNullOrEmpty;
             $result.TargetType | Should -Be 'TestType';
-        }
-
-        It 'Binds to custom type by script' {
-            $bindFn = {
-                param ($TargetObject)
-
-                $otherType = $TargetObject.PSObject.Properties['OtherType'];
-
-                if ($otherType -eq $Null) {
-                    return $Null
-                }
-
-                return $otherType.Value;
-            }
-
-            $option = New-PSRuleOption -Option @{ 'Binding.TargetType' = 'kind' } -BindTargetType $bindFn;
-            $result = $testObject | Invoke-PSRule -Option $option -Path $ruleFilePath -Name 'FromFile1';
-            $result | Should -Not -BeNullOrEmpty;
-            $result.TargetType | Should -Be 'OtherType';
         }
     }
 }

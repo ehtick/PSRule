@@ -1,5 +1,5 @@
 ---
-reviewed: 2022-02-11
+reviewed: 2024-02-16
 author: BernieWhite
 ---
 
@@ -29,7 +29,7 @@ The output format can be configuring by setting the `Output.Format` option to on
     ```yaml hl_lines="5-6"
     # Analyze and save results
     - name: Analyze repository
-      uses: microsoft/ps-rule@v2.1.0
+      uses: microsoft/ps-rule@v2.9.0
       with:
         outputFormat: Sarif
         outputPath: reports/ps-rule-results.sarif
@@ -39,7 +39,7 @@ The output format can be configuring by setting the `Output.Format` option to on
 
     ```yaml hl_lines="6-7"
     # Analyze and save results
-    - task: ps-rule-assert@1
+    - task: ps-rule-assert@2
       displayName: Analyze repository
       inputs:
         inputType: repository
@@ -59,7 +59,7 @@ The output format can be configuring by setting the `Output.Format` option to on
 
 === "Options file"
 
-    ```yaml hl_lines="2-3"
+    ```yaml title="ps-rule.yaml" hl_lines="2-3"
     output:
       format: 'Sarif'
       path: reports/ps-rule-results.sarif
@@ -234,16 +234,16 @@ To configure GitHub Actions, perform the following steps:
         steps:
 
         - name: Checkout
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
 
         - name: Run PSRule analysis
-          uses: microsoft/ps-rule@v2.1.0
+          uses: microsoft/ps-rule@v2.9.0
           with:
             outputFormat: Sarif
             outputPath: reports/ps-rule-results.sarif
 
         - name: Upload results to security tab
-          uses: github/codeql-action/upload-sarif@v1
+          uses: github/codeql-action/upload-sarif@v3
           with:
             sarif_file: reports/ps-rule-results.sarif
     ```
@@ -256,5 +256,12 @@ SARIF results from PSRule can be uploaded and viewed within Azure DevOps.
 To add the scans tab to build results the [SARIF SAST Scans Tab][2] extension needs to be installed.
 
   [2]: https://marketplace.visualstudio.com/items?itemName=sariftools.scans
+
+### Verifying configuration
+
+:octicons-milestone-24: v3.0.0
+
+The configuration used to run PSRule is included in properties of the run.
+This can be used to verify the configuration used to run PSRule.
 
 *[SARIF]: Static Analysis Results Interchange Format

@@ -1,75 +1,91 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
+namespace PSRule.Runtime;
 
-namespace PSRule.Runtime
+internal sealed class Operand : IOperand
 {
-    internal enum OperandKind
+    private const string Dot = ".";
+    private const string Space = " ";
+
+    private Operand(OperandKind kind, object value)
     {
-        None = 0,
-
-        Field = 1,
-
-        Type = 2,
-
-        Name = 3,
-
-        Source = 4
+        Kind = kind;
+        Value = value;
     }
 
-    internal interface IOperand
+    private Operand(OperandKind kind, string path, object value)
+        : this(kind, value)
     {
-        object Value { get; }
-
-        OperandKind Kind { get; }
-
-        string Path { get; }
+        Path = path;
     }
 
-    internal sealed class Operand : IOperand
+    public object Value { get; }
+
+    public string Path { get; }
+
+    public string Prefix { get; set; }
+
+    public OperandKind Kind { get; }
+
+    internal static IOperand FromName(string name, string path)
     {
-        private Operand(OperandKind kind, object value)
-        {
-            Kind = kind;
-            Value = value;
-        }
+        return new Operand(OperandKind.Name, path, name);
+    }
 
-        private Operand(OperandKind kind, string path, object value)
-            : this(kind, value)
-        {
-            Path = path;
-        }
+    internal static IOperand FromType(string type, string path)
+    {
+        return new Operand(OperandKind.Type, path, type);
+    }
 
-        public object Value { get; }
+    internal static IOperand FromPath(string path, object value = null)
+    {
+        return new Operand(OperandKind.Path, path, value);
+    }
 
-        public string Path { get; }
+    internal static IOperand FromSource(string source)
+    {
+        return new Operand(OperandKind.Source, source);
+    }
 
-        public OperandKind Kind { get; }
+    internal static IOperand FromTarget()
+    {
+        return new Operand(OperandKind.Target, null, null);
+    }
 
-        internal static IOperand FromName(string name)
-        {
-            return new Operand(OperandKind.Name, name);
-        }
+    internal static IOperand FromValue(object value)
+    {
+        return new Operand(OperandKind.Value, null, value);
+    }
 
-        internal static IOperand FromType(string type)
-        {
-            return new Operand(OperandKind.Type, type);
-        }
+    internal static IOperand FromScope(string[] scope)
+    {
+        return new Operand(OperandKind.Scope, scope);
+    }
 
-        internal static IOperand FromField(string field, object value)
-        {
-            return new Operand(OperandKind.Field, field, value);
-        }
+    internal static string JoinPath(string p1, string p2)
+    {
+        if (IsEmptyPath(p1))
+            return p2;
 
-        internal static IOperand FromSource(string source)
-        {
-            return new Operand(OperandKind.Source, source);
-        }
+        return IsEmptyPath(p2) ? p1 : string.Concat(p1, Dot, p2);
+    }
 
-        public override string ToString()
-        {
-            return string.Concat(Enum.GetName(typeof(OperandKind), Kind), " ", Path);
-        }
+    public override string ToString()
+    {
+        return string.IsNullOrEmpty(Path) || Kind == OperandKind.Target ? null : OperandString();
+    }
+
+    private string OperandString()
+    {
+        var kind = Enum.GetName(typeof(OperandKind), Kind);
+        return IsEmptyPath(Prefix) ? string.Concat(kind, Space, Path, ": ") : string.Concat(kind, Space, Prefix, Dot, Path, ": ");
+    }
+
+    private static bool IsEmptyPath(string s)
+    {
+        return string.IsNullOrEmpty(s) ||
+            string.IsNullOrWhiteSpace(s) ||
+            s == Dot;
     }
 }

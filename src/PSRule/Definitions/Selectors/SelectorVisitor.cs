@@ -1,50 +1,55 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Diagnostics;
+using PSRule.Data;
 using PSRule.Definitions.Expressions;
-using PSRule.Pipeline;
 using PSRule.Resources;
+using PSRule.Runtime;
 
-namespace PSRule.Definitions.Selectors
+namespace PSRule.Definitions.Selectors;
+
+[DebuggerDisplay("Id: {Id}")]
+internal sealed class SelectorVisitor
 {
-    internal interface ISelector : ILanguageBlock
-    {
+    private readonly LanguageExpressionOuterFn _Fn;
+    private readonly RunspaceContext _Context;
 
+    public SelectorVisitor(RunspaceContext context, string apiVersion, ResourceId id, ISourceFile source, ISelectorSpec spec)
+    {
+        _Context = context;
+        Id = id;
+        Source = source;
+        InstanceId = Guid.NewGuid();
+
+        switch (spec)
+        {
+            case ISelectorV1Spec v1:
+                _Fn = new LanguageExpressionBuilder()
+                    .Build(v1.If);
+                break;
+
+            case ISelectorV2Spec v2:
+                _Fn = new LanguageExpressionBuilder()
+                    .WithType(v2.Type)
+                    .Build(v2.If);
+                break;
+
+            default:
+                throw new UnknownSpecificationException(string.Format(Thread.CurrentThread.CurrentCulture, PSRuleResources.InvalidResourceSpecification, nameof(ISelectorSpec), id));
+        }
     }
 
-    [DebuggerDisplay("Id: {Id}")]
-    internal sealed class SelectorVisitor : ISelector
+    public Guid InstanceId { get; }
+
+    public ResourceId Id { get; }
+
+    public ISourceFile Source { get; }
+
+    public bool Match(ITargetObject o)
     {
-        private readonly LanguageExpressionOuterFn _Fn;
-
-        public SelectorVisitor(ResourceId id, SourceFile source, LanguageIf expression)
-        {
-            Id = id;
-            Source = source;
-            InstanceId = Guid.NewGuid();
-            var builder = new LanguageExpressionBuilder();
-            _Fn = builder.Build(expression);
-        }
-
-        public Guid InstanceId { get; }
-
-        public ResourceId Id { get; }
-
-        public SourceFile Source { get; }
-
-        [Obsolete("Use Source property instead.")]
-        string ILanguageBlock.SourcePath => Source.Path;
-
-        [Obsolete("Use Source property instead.")]
-        string ILanguageBlock.Module => Source.Module;
-
-        public bool Match(object o)
-        {
-            var context = new ExpressionContext(Source);
-            context.Debug(PSRuleResources.SelectorMatchTrace, Id);
-            return _Fn(context, o).GetValueOrDefault(false);
-        }
+        var context = new ExpressionContext(_Context, Source, ResourceKind.Selector, o);
+        context.Debug(PSRuleResources.SelectorMatchTrace, Id);
+        return _Fn(context, o).GetValueOrDefault(false);
     }
 }

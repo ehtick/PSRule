@@ -8,8 +8,10 @@
 name: Stale maintenance
 on:
   schedule:
-  - cron: '30 1 * * *'
+    - cron: '30 1 * * *'
   workflow_dispatch:
+
+permissions: {}
 
 jobs:
   issue:
@@ -19,8 +21,7 @@ jobs:
     permissions:
       issues: write
     steps:
-
-      - uses: actions/stale@v5
+      - uses: actions/stale@v9
         with:
           stale-issue-message: >
             This issue has been automatically marked as stale because it has not had

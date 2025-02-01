@@ -18,6 +18,7 @@ Expressions are comprised of nested conditions, operators, and comparison proper
 
 The following conditions are available:
 
+- [APIVersion](#apiversion)
 - [Contains](#contains)
 - [Count](#count)
 - [Equals](#equals)
@@ -66,6 +67,7 @@ The following comparison properties are available:
 
 - [Field](#field)
 - [Name](#name)
+- [Scope](#scope)
 - [Source](#source)
 - [Type](#type)
 
@@ -74,6 +76,10 @@ The following comparison properties are available:
 The `allOf` operator is used to require all nested expressions to match.
 When any nested expression does not match, `allOf` does not match.
 This is similar to a logical _and_ operation.
+
+Additionally sub-selectors can be used to modify the `allOf` operator.
+Sub-selectors allow filtering and looping through arrays of objects before the `allOf` operator is applied.
+See sub-selectors for more information.
 
 Syntax:
 
@@ -85,7 +91,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleAllOf'
@@ -99,7 +105,7 @@ spec:
       exists: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleAllOf'
@@ -119,6 +125,10 @@ The `anyOf` operator is used to require one or more nested expressions to match.
 When any nested expression matches, `allOf` matches.
 This is similar to a logical _or_ operation.
 
+Additionally sub-selectors can be used to modify the `anyOf` operator.
+Sub-selectors allow filtering and looping through arrays of objects before the `anyOf` operator is applied.
+See sub-selectors for more information.
+
 Syntax:
 
 ```yaml
@@ -129,7 +139,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleAnyOf'
@@ -143,7 +153,7 @@ spec:
       exists: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleAnyOf'
@@ -155,6 +165,54 @@ spec:
       exists: true
     - field: 'AlternativeName'
       exists: true
+```
+
+### APIVersion
+
+The `apiVersion` condition determines if the operand is a valid date version.
+A constraint can optionally be provided to require the date version to be within a range.
+Supported version constraints for expression are the same as the `$Assert.APIVersion` assertion helper.
+
+Syntax:
+
+```yaml
+apiVersion: <string>
+includePrerelease: <bool>
+```
+
+For example:
+
+```yaml
+---
+apiVersion: github.com/microsoft/PSRule/2025-01-01
+kind: Rule
+metadata:
+  name: 'ExampleAPIVersion'
+spec:
+  condition:
+    field: 'engine.apiVersion'
+    apiVersion: '>=2015-10-01'
+
+---
+apiVersion: github.com/microsoft/PSRule/2025-01-01
+kind: Selector
+metadata:
+  name: 'ExampleAnyAPIVersion'
+spec:
+  if:
+    field: 'engine.apiVersion'
+    apiVersion: ''
+
+---
+apiVersion: github.com/microsoft/PSRule/2025-01-01
+kind: Selector
+metadata:
+  name: 'ExampleAPIVersionIncludingPrerelease'
+spec:
+  if:
+    field: 'engine.apiVersion'
+    apiVersion: '>=2015-10-01'
+    includePrerelease: true
 ```
 
 ### Contains
@@ -181,7 +239,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleContains'
@@ -196,7 +254,7 @@ spec:
       - 'github.com'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleContains'
@@ -225,7 +283,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleCount'
@@ -235,7 +293,7 @@ spec:
     count: 2
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleCount'
@@ -267,7 +325,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleEquals'
@@ -277,7 +335,7 @@ spec:
     equals: 'TargetObject1'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleEquals'
@@ -311,7 +369,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleEndsWith'
@@ -326,7 +384,7 @@ spec:
       - '.com'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleEndsWith'
@@ -358,7 +416,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleExists'
@@ -368,7 +426,7 @@ spec:
     exists: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleExists'
@@ -398,7 +456,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleField'
@@ -408,7 +466,7 @@ spec:
     exists: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleField'
@@ -445,7 +503,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleGreater'
@@ -455,7 +513,7 @@ spec:
     greater: 3
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleGreater'
@@ -492,7 +550,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleGreaterOrEquals'
@@ -502,7 +560,7 @@ spec:
     greaterOrEquals: 3
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleGreaterOrEquals'
@@ -533,7 +591,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleHasDefault'
@@ -543,7 +601,7 @@ spec:
     hasDefault: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleHasDefault'
@@ -581,7 +639,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleHasSchema'
@@ -592,7 +650,7 @@ spec:
     - https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleHasSchema'
@@ -605,7 +663,7 @@ spec:
     ignoreScheme: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleHasAnySchema'
@@ -632,7 +690,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleHasValue'
@@ -642,7 +700,7 @@ spec:
     hasValue: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleHasValue'
@@ -666,7 +724,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleIn'
@@ -678,7 +736,7 @@ spec:
     - 'Value2'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleIn'
@@ -709,7 +767,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleIsLower'
@@ -719,7 +777,7 @@ spec:
     isLower: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleIsLower'
@@ -747,7 +805,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleIsString'
@@ -757,7 +815,7 @@ spec:
     isString: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleIsString'
@@ -786,7 +844,7 @@ For example:
 ```yaml
 ---
 # Synopsis: Using isArray
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: IsArrayExample
@@ -818,7 +876,7 @@ For example:
 ```yaml
 ---
 # Synopsis: Using isBoolean
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: IsBooleanExample
@@ -829,7 +887,7 @@ spec:
 
 ---
 # Synopsis: Using isBoolean with conversion
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: IsBooleanExampleWithConversion
@@ -862,7 +920,7 @@ For example:
 ```yaml
 ---
 # Synopsis: Using isDateTime
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: IsDateTimeExample
@@ -873,7 +931,7 @@ spec:
 
 ---
 # Synopsis: Using isDateTime with conversion
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: IsDateTimeExampleWithConversion
@@ -907,7 +965,7 @@ For example:
 ```yaml
 ---
 # Synopsis: Using isInteger
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: IsIntegerExample
@@ -918,7 +976,7 @@ spec:
 
 ---
 # Synopsis: Using isInteger with conversion
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: IsIntegerExampleWithConversion
@@ -952,7 +1010,7 @@ For example:
 ```yaml
 ---
 # Synopsis: Using isNumeric
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: IsNumericExample
@@ -963,7 +1021,7 @@ spec:
 
 ---
 # Synopsis: Using isNumeric with conversion
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: IsNumercExampleWithConversion
@@ -993,7 +1051,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleIsUpper'
@@ -1003,7 +1061,7 @@ spec:
     isUpper: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleIsUpper'
@@ -1040,7 +1098,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleLess'
@@ -1050,7 +1108,7 @@ spec:
     less: 3
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleLess'
@@ -1087,7 +1145,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleLessOrEquals'
@@ -1097,7 +1155,7 @@ spec:
     lessOrEquals: 3
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleLessOrEquals'
@@ -1131,7 +1189,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleLike'
@@ -1146,7 +1204,7 @@ spec:
       - 'https://*'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleLike'
@@ -1165,17 +1223,21 @@ spec:
 
 The `match` condition can be used to compare if a field matches a supplied regular expression.
 
+- `caseSensitive` - Optionally, a case sensitive-comparison can be performed.
+  By default, case-insensitive comparison is performed.
+
 Syntax:
 
 ```yaml
 match: <string>
+caseSensitive: <boolean>
 ```
 
 For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleMatch'
@@ -1185,7 +1247,7 @@ spec:
     match: '$(abc|efg)$'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleMatch'
@@ -1211,7 +1273,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleName'
@@ -1221,7 +1283,7 @@ spec:
     equals: 'TargetObject1'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleName'
@@ -1249,7 +1311,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleNot'
@@ -1261,7 +1323,7 @@ spec:
       exists: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleNot'
@@ -1298,7 +1360,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleNotContains'
@@ -1313,7 +1375,7 @@ spec:
       - 'github.com'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleNotContains'
@@ -1342,7 +1404,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleNotCount'
@@ -1352,7 +1414,7 @@ spec:
     notCount: 2
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleNotCount'
@@ -1387,7 +1449,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleNotEndsWith'
@@ -1402,7 +1464,7 @@ spec:
       - '.com'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleNotEndsWith'
@@ -1439,7 +1501,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleNotEquals'
@@ -1449,7 +1511,7 @@ spec:
     notEquals: 'TargetObject1'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleNotEquals'
@@ -1473,7 +1535,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleNotIn'
@@ -1485,7 +1547,7 @@ spec:
     - 'Value2'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleNotIn'
@@ -1522,7 +1584,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleNotLike'
@@ -1537,7 +1599,7 @@ spec:
       - 'https://'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleNotLike'
@@ -1556,17 +1618,21 @@ spec:
 
 The `notMatch` condition can be used to compare if a field does not matches a supplied regular expression.
 
+- `caseSensitive` - Optionally, a case sensitive-comparison can be performed.
+  By default, case-insensitive comparison is performed.
+
 Syntax:
 
 ```yaml
 notMatch: <string>
+caseSensitive: <boolean>
 ```
 
 For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleNotMatch'
@@ -1576,7 +1642,7 @@ spec:
     notMatch: '$(abc|efg)$'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleNotMatch'
@@ -1611,7 +1677,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleNotStartsWith'
@@ -1626,7 +1692,7 @@ spec:
       - 'https://'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleNotStartsWith'
@@ -1653,12 +1719,19 @@ The following properties are accepted:
 - `caseSensitive` - Optionally, a case-sensitive comparison can be performed for string values.
   By default, case-insensitive comparison is performed.
 
+Syntax:
+
+```yaml
+notWithinPath: <array>
+caseSensitive: <boolean>
+```
+
 For example:
 
 ```yaml
 ---
 # Synopsis: Test notWithinPath with source
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: YamlSourceNotWithinPath
@@ -1670,7 +1743,7 @@ spec:
 
 ---
 # Synopsis: Test notWithinPath with source and case sensitive
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: YamlSourceNotWithinPathCaseSensitive
@@ -1680,6 +1753,42 @@ spec:
     notWithinPath:
       - "Deployments/Path/"
     caseSensitive: true
+```
+
+### Scope
+
+The comparison property `scope` is used with a condition to evaluate any scopes assigned to the object.
+The `scope` property must be set to `.`.
+Any other value will cause the condition to evaluate to `false`.
+
+Syntax:
+
+```yaml
+scope: '.'
+```
+
+For example:
+
+```yaml
+---
+apiVersion: github.com/microsoft/PSRule/2025-01-01
+kind: Rule
+metadata:
+  name: 'ExampleScope'
+spec:
+  condition:
+    scope: '.'
+    startsWith: '/'
+
+---
+apiVersion: github.com/microsoft/PSRule/2025-01-01
+kind: Selector
+metadata:
+  name: 'ExampleScope'
+spec:
+  if:
+    scope: '.'
+    startsWith: '/'
 ```
 
 ### SetOf
@@ -1701,7 +1810,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleSetOf'
@@ -1715,7 +1824,7 @@ spec:
     caseSensitive: false
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleSetOf'
@@ -1745,7 +1854,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: IgnoreTestFiles
@@ -1779,7 +1888,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleStartsWith'
@@ -1794,7 +1903,7 @@ spec:
       - 'https://'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleStartsWith'
@@ -1831,7 +1940,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleSubset'
@@ -1846,7 +1955,7 @@ spec:
     unique: true
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleSubset'
@@ -1877,7 +1986,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleType'
@@ -1887,7 +1996,7 @@ spec:
     equals: 'CustomType'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleType'
@@ -1916,7 +2025,7 @@ For example:
 
 ```yaml
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Rule
 metadata:
   name: 'ExampleVersion'
@@ -1926,7 +2035,7 @@ spec:
     version: '^1.2.3'
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleAnyVersion'
@@ -1936,7 +2045,7 @@ spec:
     version: ''
 
 ---
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: 'ExampleVersionIncludingPrerelease'
@@ -1959,12 +2068,19 @@ The following properties are accepted:
 - `caseSensitive` - Optionally, a case-sensitive comparison can be performed for string values.
   By default, case-insensitive comparison is performed.
 
+Syntax:
+
+```yaml
+withinPath: <array>
+caseSensitive: <boolean>
+```
+
 For example:
 
 ```yaml
 ---
 # Synopsis: Test withinPath with source
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: YamlSourceWithinPath
@@ -1976,7 +2092,7 @@ spec:
 
 ---
 # Synopsis: Test withinPath with source and case sensitive
-apiVersion: github.com/microsoft/PSRule/v1
+apiVersion: github.com/microsoft/PSRule/2025-01-01
 kind: Selector
 metadata:
   name: YamlSourceWithinPathCaseSensitive
@@ -1990,7 +2106,7 @@ spec:
 
 ## NOTE
 
-An online version of this document is available at https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/.
+An online version of this document is available at <https://microsoft.github.io/PSRule/v2/concepts/PSRule/en-US/about_PSRule_Expressions/>.
 
 ## SEE ALSO
 

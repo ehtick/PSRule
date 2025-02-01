@@ -38,8 +38,8 @@ Install-Module -Name 'PSRule' -Repository PSGallery -Scope CurrentUser
 !!! Tip
     To make you editing experience even better, consider installing the Visual Studio Code extension.
 
-  [2]: ../install-instructions.md#installing-powershell
-  [3]: ../install-instructions.md#getting-the-modules
+  [2]: ../setup/index.md#with-powershell
+  [3]: ../setup/index.md#getting-the-modules
 
 ## Scenario - Test for image files
 
@@ -64,7 +64,7 @@ Before an object can be tested with PSRule, one or more rules must be defined.
 Each rule is defined in a file named with the suffix `.Rule.yaml`, `.Rule.jsonc`, or `.Rule.ps1`.
 Multiple rules can be defined in a single file.
 
-A rule that fail on files with `.jpg` or `.png` extensions is shown in YAML, JSON, and PowerShell formats.
+A rule that fails on files with `.jpg` or `.png` extensions is shown in YAML, JSON, and PowerShell formats.
 You only need to choose one format, however you can choose to create all three to try out each format.
 
 === "YAML"
@@ -76,7 +76,7 @@ You only need to choose one format, however you can choose to create all three t
     ```yaml title="YAML"
     ---
     # Synopsis: Image files are not permitted.
-    apiVersion: github.com/microsoft/PSRule/v1
+    apiVersion: github.com/microsoft/PSRule/2025-01-01
     kind: Rule
     metadata:
       name: Yaml.FileType
@@ -110,7 +110,7 @@ You only need to choose one format, however you can choose to create all three t
     [
         {
             // Synopsis: Image files are not permitted.
-            "apiVersion": "github.com/microsoft/PSRule/v1",
+            "apiVersion": "github.com/microsoft/PSRule/2025-01-01",
             "kind": "Rule",
             "metadata": {
                 "name": "Json.FileType"
@@ -249,7 +249,7 @@ A selector determines _if_ the rule will be run or skipped.
     ```yaml title="YAML"
     ---
     # Synopsis: Find services with an automatic start type.
-    apiVersion: github.com/microsoft/PSRule/v1
+    apiVersion: github.com/microsoft/PSRule/2025-01-01
     kind: Selector
     metadata:
       name: Yaml.IsAutomaticService
@@ -277,7 +277,7 @@ A selector determines _if_ the rule will be run or skipped.
     [
         {
             // Synopsis: Find services with an automatic start type.
-            "apiVersion": "github.com/microsoft/PSRule/v1",
+            "apiVersion": "github.com/microsoft/PSRule/2025-01-01",
             "kind": "Selector",
             "metadata": {
                 "name": "Json.IsAutomaticService"
@@ -311,7 +311,7 @@ Similar to the selector, the `Status` field will be tested to determine if the s
     ```yaml title="YAML"
     ---
     # Synopsis: Automatic services should be running.
-    apiVersion: github.com/microsoft/PSRule/v1
+    apiVersion: github.com/microsoft/PSRule/2025-01-01
     kind: Rule
     metadata:
       name: Yaml.ServiceStarted
@@ -343,7 +343,7 @@ Similar to the selector, the `Status` field will be tested to determine if the s
     [
         {
             // Synopsis: Find services with an automatic start type.
-            "apiVersion": "github.com/microsoft/PSRule/v1",
+            "apiVersion": "github.com/microsoft/PSRule/2025-01-01",
             "kind": "Selector",
             "metadata": {
                 "name": "Json.IsAutomaticService"
@@ -358,7 +358,7 @@ Similar to the selector, the `Status` field will be tested to determine if the s
         },
         {
             // Synopsis: Automatic services should be running.
-            "apiVersion": "github.com/microsoft/PSRule/v1",
+            "apiVersion": "github.com/microsoft/PSRule/2025-01-01",
             "kind": "Rule",
             "metadata": {
                 "name": "Json.ServiceStarted"
@@ -455,7 +455,7 @@ WARNING: Target object 'TermService' has not been processed because no matching 
 ```
 
 !!! Tip
-    You can disable the warning by setting [Execution.NotProcessedWarning][5] option.
+    You can disable the warning by setting [Execution.UnprocessedObject][5] option.
     Alternatively you can ignore all warnings by using the `-WarningAction SilentlyContinue` parameter.
 
-  [5]: ../concepts/PSRule/en-US/about_PSRule_Options.md#executionnotprocessedwarning
+  [5]: ../concepts/PSRule/en-US/about_PSRule_Options.md#executionunprocessedobject

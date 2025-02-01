@@ -1,0 +1,21 @@
+[
+  {
+    "name": "01_requiresModules",
+    "snippet": [
+      "requires:",
+      "  PSRule: '>=2.9.0'",
+      "  PSRule.Rules.Azure: '>=1.39.3'"
+    ]
+  },
+  {
+    "name": "01_configureAzure",
+    "snippet": [
+      "configuration:",
+      "  # Enable expansion of Azure Template parameter files.",
+      "  AZURE_PARAMETER_FILE_EXPANSION: true",
+      "",
+      "  # Enable expansion of Azure Bicep files.",
+      "  AZURE_BICEP_FILE_EXPANSION: true"
+    ]
+  }
+]

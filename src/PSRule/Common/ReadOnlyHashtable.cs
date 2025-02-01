@@ -3,13 +3,17 @@
 
 using System.Collections;
 
-namespace PSRule
-{
-    public sealed class ReadOnlyHashtable : Hashtable
-    {
-        internal ReadOnlyHashtable(IDictionary dictionary, IEqualityComparer equalityComparer)
-            : base(dictionary, equalityComparer) { }
+namespace PSRule;
 
-        public override bool IsReadOnly => true;
-    }
+/// <summary>
+/// Defined a readonly hashtable.
+/// </summary>
+public sealed class ReadOnlyHashtable : Hashtable
+{
+    internal ReadOnlyHashtable(IDictionary dictionary, IEqualityComparer equalityComparer)
+        : base(dictionary, equalityComparer) { }
+
+
+    /// <inheritdoc/>
+    public override bool IsReadOnly => true;
 }

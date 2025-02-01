@@ -20,6 +20,7 @@ Each `$Assert` method returns an `AssertResult` object that contains the result 
 
 The following built-in assertion methods are provided:
 
+- [APIVersion](#apiversion) - The field value must be a date version string.
 - [Contains](#contains) - The field value must contain at least one of the strings.
 - [Count](#count) - The field value must contain the specified number of items.
 - [EndsWith](#endswith) - The field value must match at least one suffix.
@@ -138,9 +139,97 @@ Notable differences between object paths and JSONPath are:
   However member names can not start or end with a dash.
   i.e. `Properties.dashed-name` and `Properties.'-dashed-name'` are valid.
 
+### APIVersion
+
+The `APIVersion` assertion method checks the field value is a valid stable date version.
+A constraint can optionally be provided to require the date version to be within a range.
+By default, only stable versions are accepted unless pre-releases are included.
+
+A date version uses the format `yyyy-MM-dd` (`2015-10-01`).
+Additionally an optional string pre-release identifier can be used `yyyy-MM-dd-prerelease` (`2015-10-01-preview.1`).
+
+The following parameters are accepted:
+
+- `inputObject` - The object being checked for the specified field.
+- `field` - The name of the field to check.
+  This is a case insensitive compare.
+- `constraint` (optional) - A version constraint, see below for details of version constrain format.
+- `includePrerelease` (optional) - Determines if pre-release versions are included.
+  Unless specified this defaults to `$False`.
+
+The following are supported constraints:
+
+- `version` - Must match version exactly. This also accepts the prefix `=`.
+  - e.g. `2015-10-01`, `=2015-10-01`
+- `>version` - Must be greater than version.
+  - e.g. `>2015-10-01`
+- `>=version` - Must be greater than or equal to version.
+  - e.g. `>=2015-10-01`
+- `<version` - Must be less than version.
+  - e.g. `<2022-03-01`
+- `<=version` - Must be less than or equal to version.
+  - e.g. `<=2022-03-01`
+
+An empty, null or `*` constraint matches all valid date versions.
+
+Multiple constraints can be joined together:
+
+- Use a _space_ to separate multiple constraints, each must be true (_logical AND_).
+- Separates constraint sets with the double pipe `||`.
+  Only one constraint set must be true (_logical OR_).
+
+By example:
+
+- `2014-01-01 || >=2015-10-01 <2022-03-01` results in:
+  - Pass: `2014-01-01`, `2015-10-01`, `2019-06-30`, `2022-02-01`.
+  - Fail: `2015-01-01`, `2022-09-01`.
+
+Handling for pre-release versions:
+
+- Constraints and versions containing pre-release identifiers are supported.
+  i.e. `>=2015-10-01-preview` or `2015-10-01-preview`.
+- A version containing a pre-release identifier follows similar ordering to semantic versioning.
+  i.e. `2015-10-01-preview` < `2015-10-01-preview.1` < `2015-10-01` < `2022-03-01-preview` < `2022-03-01`.
+- A constraint without a pre-release identifier will only match a stable version by default.
+  Set `includePrerelease` to `$True` to include pre-;release versions.
+  Alternatively use the `@pre` or `@prerelease` flag in a constraint.
+
+Reasons include:
+
+- _The parameter 'inputObject' is null._
+- _The parameter 'field' is null or empty._
+- _The field '{0}' does not exist._
+- _The field value '{0}' is not a version string._
+- _The version '{0}' does not match the constraint '{1}'._
+
+Examples:
+
+```powershell
+Rule 'ValidStableAPIVersion' {
+    $Assert.APIVersion($TargetObject, 'apiVersion')
+}
+
+Rule 'AnyValidAPIVersion' {
+    $Assert.APIVersion($TargetObject, 'apiVersion', '', $True)
+}
+
+Rule 'MinimumAPIVersion' {
+    $Assert.APIVersion($TargetObject, 'apiVersion', '>=2015-10-01')
+}
+
+Rule 'MinimumAPIVersionWithPrerelease' {
+    $Assert.APIVersion($TargetObject, 'apiVersion', '>=2015-10-01-0', $True)
+}
+
+Rule 'MinimumAPIVersionWithFlag' {
+    $Assert.APIVersion($TargetObject, 'apiVersion', '@pre >=2015-10-01-0')
+}
+```
+
 ### Contains
 
-The `Contains` assertion method checks the field value contains the specified string.
+The `Contains` assertion method checks the operand contains the specified string.
+If the operand is an array of strings, only one string must contain the specified string.
 Optionally a case-sensitive compare can be used, however case is ignored by default.
 
 The following parameters are accepted:
@@ -201,7 +290,8 @@ Rule 'Count' {
 
 ### EndsWith
 
-The `EndsWith` assertion method checks the field value ends with the specified suffix.
+The `EndsWith` assertion method checks the operand ends with the specified suffix.
+If the operand is an array of strings, only one string must end with the specified suffix.
 Optionally a case-sensitive compare can be used, however case is ignored by default.
 
 The following parameters are accepted:
@@ -250,11 +340,11 @@ When set, detection by file extension is skipped.
 
 Prefix detection for line comments is supported with the following file extensions:
 
-- `.bicep`, `.cs`, `.csx` `.ts`, `.js`, `.jsx`,
+- `.bicep`, `.bicepparam`, `.cs`, `.csx`, `.ts`, `.tsp`, `.tsx`, `.js`, `.jsx`,
 `.fs`, `.go`, `.groovy`, `.php`, `.cpp`, `.h`,
 `.java`, `.json`, `.jsonc`, `.scala`, `Jenkinsfile` - Use a prefix of (`// `).
-- `.ps1`, `.psd1`, `.psm1`, `.yaml`, `.yml`,
-`.r`, `.py`, `.sh`, `.tf`, `.tfvars`, `.gitignore`,
+- `.editorconfig`, `.ipynb`, `.ps1`, `.psd1`, `.psm1`, `.yaml`, `.yml`,
+`.r`, `.py`, `.sh`, `.tf`, `.tfvars`, `.toml`, `.gitignore`,
 `.pl`, `.rb`, `Dockerfile` - Use a prefix of (`# `).
 - `.sql`, `.lau` - Use a prefix of (`-- `).
 - `.bat`, `.cmd` - Use a prefix of (`:: `).
@@ -435,7 +525,7 @@ Reasons include:
 
 - _The parameter 'inputObject' is null._
 - _The parameter 'field' is null or empty._
-- _The field '{0}' does not exist._
+- _Does not exist._
 
 Examples:
 
@@ -498,9 +588,9 @@ Reasons include:
 
 - _The parameter 'inputObject' is null._
 - _The parameter 'field' is null or empty._
-- _The field '{0}' does not exist._
-- _The value of '{0}' is null or empty._
-- _The field '{0}' is set to '{1}'._
+- _Does not exist._
+- _Is null or empty._
+- _Is set to '{0}'._
 
 Examples:
 
@@ -647,7 +737,7 @@ Reasons include:
 - _The parameter 'field' is null or empty._
 - _The field '{0}' does not exist._
 - _The field value '{0}' is null._
-- _The field value '{1}' of type {0} is not \[bool\]._
+- _The value '{0}' is not a boolean._
 
 Examples:
 
@@ -679,7 +769,7 @@ Reasons include:
 - _The parameter 'field' is null or empty._
 - _The field '{0}' does not exist._
 - _The field value '{0}' is null._
-- _The field value '{1}' of type {0} is not \[DateTime\]._
+- _The value '{0}' is not a date._
 
 Examples:
 
@@ -712,7 +802,7 @@ Reasons include:
 - _The parameter 'field' is null or empty._
 - _The field '{0}' does not exist._
 - _The field value '{0}' is null._
-- _The field value '{1}' of type {0} is not an integer._
+- _The value '{0}' is not an integer._
 
 Examples:
 
@@ -778,7 +868,7 @@ Reasons include:
 - _The parameter 'field' is null or empty._
 - _The field '{0}' does not exist._
 - _The field value '{0}' is null._
-- _The field value '{1}' of type {0} is not numeric._
+- _The value '{0}' is not numeric._
 
 Examples:
 
@@ -808,7 +898,7 @@ Reasons include:
 - _The parameter 'field' is null or empty._
 - _The field '{0}' does not exist._
 - _The field value '{0}' is null._
-- _The field value '{1}' of type {0} is not \[string\]._
+- _The value '{0}' is not a string._
 
 Examples:
 
@@ -987,8 +1077,9 @@ Rule 'Match' {
 
 ### NotContains
 
-The `NotContains` assertion method checks the field value contains the specified string.
+The `NotContains` assertion method checks the operand contains the specified string.
 This condition fails when any of the specified sub-strings are found.
+If the operand is an array of strings, this condition fails if any of the strings contain the specified string.
 Optionally a case-sensitive compare can be used, however case is ignored by default.
 
 The following parameters are accepted:
@@ -1047,8 +1138,9 @@ Rule 'NotCount' {
 
 ### NotEndsWith
 
-The `NotEndsWith` assertion method checks the field value ends with the specified suffix.
+The `NotEndsWith` assertion method checks the operand ends with the specified suffix.
 This condition fails when any of the specified sub-strings are found at the end of the operand.
+If the operand is an array of strings, this condition fails if any of the strings ends with the specified suffix.
 Optionally a case-sensitive compare can be used, however case is ignored by default.
 
 The following parameters are accepted:
@@ -1230,8 +1322,9 @@ Rule 'NotNull' {
 
 ### NotStartsWith
 
-The `NotStartsWith` assertion method checks the field value starts with the specified prefix.
+The `NotStartsWith` assertion method checks the operand starts with the specified prefix.
 This condition fails when any of the specified sub-strings are found at the start of the operand.
+If the operand is an array of strings, this condition fails if any of the strings start with the specified prefix.
 Optionally a case-sensitive compare can be used, however case is ignored by default.
 
 The following parameters are accepted:
@@ -1424,7 +1517,8 @@ Rule 'Subset' {
 
 ### StartsWith
 
-The `StartsWith` assertion method checks the field value starts with the specified prefix.
+The `StartsWith` assertion method checks the operand starts with the specified prefix.
+If the operand is an array of strings, only one string must start with the specified prefix.
 Optionally a case-sensitive compare can be used, however case is ignored by default.
 
 The following parameters are accepted:
@@ -1495,17 +1589,18 @@ Rule 'Subset' {
 
 ### Version
 
-The `Version` assertion method checks the field value is a valid semantic version.
+The `Version` assertion method checks the field value is a valid stable semantic version.
 A constraint can optionally be provided to require the semantic version to be within a range.
+By default, only stable versions are accepted unless pre-releases are included.
 
 The following parameters are accepted:
 
 - `inputObject` - The object being checked for the specified field.
 - `field` - The name of the field to check.
-This is a case insensitive compare.
+  This is a case insensitive compare.
 - `constraint` (optional) - A version constraint, see below for details of version constrain format.
-- `includePrerelease` (optional) - Determines if prerelease versions are included.
-Unless specified this defaults to `$False`.
+- `includePrerelease` (optional) - Determines if pre-release versions are included.
+  Unless specified this defaults to `$False`.
 
 The following are supported constraints:
 
@@ -1538,17 +1633,17 @@ By example:
   - Pass: `1.2.3`, `3.4.5`, `3.5.0`, `4.9.9`.
   - Fail: `3.0.0`, `5.0.0`.
 
-Handling for prerelease versions:
+Handling for pre-release versions:
 
-- Constraints and versions containing prerelease identifiers are supported.
-i.e. `>=1.2.3-build.1` or `1.2.3-build.1`.
-- A version containing a prerelease identifer follows semantic versioning rules.
+- Constraints and versions containing pre-release identifiers are supported.
+  i.e. `>=1.2.3-build.1` or `1.2.3-build.1`.
+- A version containing a pre-release identifier follows semantic versioning rules.
 i.e. `1.2.3-alpha` < `1.2.3-alpha.1` < `1.2.3-alpha.beta` < `1.2.3-beta` < `1.2.3-beta.2` < `1.2.3-beta.11` < `1.2.3-rc.1` < `1.2.3`.
-- A constraint without a prerelease identifer will only match a stable version by default.
-Set `includePrerelease` to `$True` to include prerelease versions.
-- Constraints with a prerelease identifer will only match:
-  - Matching prerelease versions of the same major.minor.patch version by default.
-  Set `includePrerelease` to `$True` to include prerelease versions of all matching versions.
+- A constraint without a pre-release identifier will only match a stable version by default.
+  Set `includePrerelease` to `$True` to include pre-release versions.
+- Constraints with a pre-release identifier will only match:
+  - Matching pre-release versions of the same major.minor.patch version by default.
+  Set `includePrerelease` to `$True` to include pre-release versions of all matching versions.
   Alternatively use the `@pre` or `@prerelease` flag in a constraint.
   - Matching stable versions.
 
@@ -1583,8 +1678,12 @@ Reasons include:
 Examples:
 
 ```powershell
-Rule 'ValidVersion' {
+Rule 'ValidStableVersion' {
     $Assert.Version($TargetObject, 'version')
+}
+
+Rule 'AnyValidVersion' {
+    $Assert.Version($TargetObject, 'version', '', $True)
 }
 
 Rule 'MinimumVersion' {
@@ -1655,8 +1754,17 @@ The following methods are available:
 - `Reason(<string> text, params <object[]> args)` - Replaces the reason on the results with a formatted string.
   This method can be chained.
   For usage see examples below.
+- `ReasonFrom(<string> path, <string> text, params <object[]> args)` - Replaces the reason on the results with a formatted string.
+  Path specifies the object path that affected the reason.
+  This method can be chained.
+  For usage see examples below.
 - `ReasonIf(<bool> condition, <string> text, params <object[]> args)` - Replaces the reason if the condition is true.
   This method can be chained, similar to `Reason`.
+- `ReasonIf(<string> path, <bool> condition, <string> text, params <object[]> args)` - Replaces the reason if the condition is true.
+  This method can be chained, similar to `ReasonFrom`.
+- `PathPrefix(<string> path)` - Adds a path prefix to any reasons.
+  This method can be chained.
+  For usage see examples below.
 - `GetReason()` - Gets any reasons currently associated with the failed result.
 - `Complete()` - Returns `$True` (Pass) or `$False` (Fail) to the rule record.
   If the assertion failed, any reasons are automatically added to the rule record.
@@ -1692,6 +1800,17 @@ Rule 'Assert.HasCustomValue' {
     $Assert.
         HasDefaultValue($TargetObject, 'value', 'test').
         Reason($LocalizedData.NonDefaultValue, 'value', $TargetObject.value)
+}
+```
+
+In this example, the built-in reason has a path prefix added to any reasons.
+
+```powershell
+Rule 'Assert.ChildHasFieldValue' {
+    $items = @($TargetObject.items)
+    for ($i = 0; $i -lt $items.Length; $i++) {
+        $Assert.HasFieldValue($items[$i], 'Name').PathPrefix("items[$i]")
+    }
 }
 ```
 

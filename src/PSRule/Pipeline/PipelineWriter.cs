@@ -1,273 +1,306 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
 using System.Management.Automation;
-using System.Threading;
 using PSRule.Configuration;
 using PSRule.Resources;
 using PSRule.Rules;
+using PSRule.Runtime;
 
-namespace PSRule.Pipeline
+namespace PSRule.Pipeline;
+
+#nullable enable
+
+/// <summary>
+/// A base class for writers.
+/// </summary>
+internal abstract class PipelineWriter(IPipelineWriter? inner, PSRuleOption option, ShouldProcess shouldProcess) : IPipelineWriter
 {
-    public delegate void MessageHook(string message);
+    protected const string ErrorPreference = "ErrorActionPreference";
+    protected const string WarningPreference = "WarningPreference";
+    protected const string VerbosePreference = "VerbosePreference";
+    protected const string InformationPreference = "InformationPreference";
+    protected const string DebugPreference = "DebugPreference";
 
-    public delegate void ErrorRecordHook(ErrorRecord errorRecord);
+    private readonly IPipelineWriter? _Writer = inner;
+    private readonly ShouldProcess _ShouldProcess = shouldProcess;
 
-    public interface IPipelineWriter
+    protected readonly PSRuleOption Option = option;
+
+    private bool _IsDisposed;
+    private bool _HadErrors;
+    private bool _HadFailures;
+
+    bool IPipelineWriter.HadErrors => HadErrors;
+
+    bool IPipelineWriter.HadFailures => HadFailures;
+
+    /// <inheritdoc/>
+    public virtual bool HadErrors
     {
-        void WriteVerbose(string message);
-
-        bool ShouldWriteVerbose();
-
-        void WriteWarning(string message);
-
-        bool ShouldWriteWarning();
-
-        void WriteError(ErrorRecord errorRecord);
-
-        bool ShouldWriteError();
-
-        void WriteInformation(InformationRecord informationRecord);
-
-        void WriteHost(HostInformationMessage info);
-
-        bool ShouldWriteInformation();
-
-        void WriteDebug(DebugRecord debugRecord);
-
-        void WriteDebug(string text, params object[] args);
-
-        bool ShouldWriteDebug();
-
-        void WriteObject(object sendToPipeline, bool enumerateCollection);
-
-        void EnterScope(string scopeName);
-
-        void ExitScope();
-
-        void Begin();
-
-        void End();
-    }
-
-    internal abstract class PipelineWriter : IPipelineWriter
-    {
-        protected const string ErrorPreference = "ErrorActionPreference";
-        protected const string WarningPreference = "WarningPreference";
-        protected const string VerbosePreference = "VerbosePreference";
-        protected const string InformationPreference = "InformationPreference";
-        protected const string DebugPreference = "DebugPreference";
-
-        private readonly PipelineWriter _Writer;
-
-        protected readonly PSRuleOption Option;
-
-        protected PipelineWriter(PipelineWriter inner, PSRuleOption option)
+        get
         {
-            _Writer = inner;
-            Option = option;
+            return _HadErrors || (_Writer != null && _Writer.HadErrors);
         }
-
-        public virtual void Begin()
+        set
         {
-            if (_Writer == null)
-                return;
-
-            _Writer.Begin();
-        }
-
-        public virtual void WriteObject(object sendToPipeline, bool enumerateCollection)
-        {
-            if (_Writer == null || sendToPipeline == null)
-                return;
-
-            _Writer.WriteObject(sendToPipeline, enumerateCollection);
-        }
-
-        public virtual void End()
-        {
-            if (_Writer == null)
-                return;
-
-            _Writer.End();
-        }
-
-        public virtual void WriteVerbose(string message)
-        {
-            if (_Writer == null || string.IsNullOrEmpty(message))
-                return;
-
-            _Writer.WriteVerbose(message);
-        }
-
-        public virtual bool ShouldWriteVerbose()
-        {
-            return _Writer != null && _Writer.ShouldWriteVerbose();
-        }
-
-        public virtual void WriteWarning(string message)
-        {
-            if (_Writer == null || string.IsNullOrEmpty(message))
-                return;
-
-            _Writer.WriteWarning(message);
-        }
-
-        public virtual bool ShouldWriteWarning()
-        {
-            return _Writer != null && _Writer.ShouldWriteWarning();
-        }
-
-        public virtual void WriteError(ErrorRecord errorRecord)
-        {
-            if (_Writer == null || errorRecord == null)
-                return;
-
-            _Writer.WriteError(errorRecord);
-        }
-
-        public virtual bool ShouldWriteError()
-        {
-            return _Writer != null && _Writer.ShouldWriteError();
-        }
-
-        public virtual void WriteInformation(InformationRecord informationRecord)
-        {
-            if (_Writer == null || informationRecord == null)
-                return;
-
-            _Writer.WriteInformation(informationRecord);
-        }
-
-        public virtual void WriteHost(HostInformationMessage info)
-        {
-            if (_Writer == null)
-                return;
-
-            _Writer.WriteHost(info);
-        }
-
-        public virtual bool ShouldWriteInformation()
-        {
-            return _Writer != null && _Writer.ShouldWriteInformation();
-        }
-
-        public virtual void WriteDebug(DebugRecord debugRecord)
-        {
-            if (_Writer == null || debugRecord == null)
-                return;
-
-            _Writer.WriteDebug(debugRecord);
-        }
-
-        public void WriteDebug(string text, params object[] args)
-        {
-            if (_Writer == null || string.IsNullOrEmpty(text) || !ShouldWriteDebug())
-                return;
-
-            text = args == null || args.Length == 0 ? text : string.Format(Thread.CurrentThread.CurrentCulture, text, args);
-            _Writer.WriteDebug(new DebugRecord(text));
-        }
-
-        public virtual bool ShouldWriteDebug()
-        {
-            return _Writer != null && _Writer.ShouldWriteDebug();
-        }
-
-        public virtual void EnterScope(string scopeName)
-        {
-            if (_Writer == null)
-                return;
-
-            _Writer.EnterScope(scopeName);
-        }
-
-        public virtual void ExitScope()
-        {
-            if (_Writer == null)
-                return;
-
-            _Writer.ExitScope();
-        }
-
-        protected void WriteErrorInfo(RuleRecord record)
-        {
-            if (record == null || record.Error == null)
-                return;
-
-            var errorRecord = new ErrorRecord(
-                record.Error.Exception,
-                record.Error.ErrorId,
-                record.Error.Category,
-                record.TargetName
-            );
-            errorRecord.CategoryInfo.TargetType = record.TargetType;
-            errorRecord.ErrorDetails = new ErrorDetails(string.Format(
-                Thread.CurrentThread.CurrentCulture,
-                PSRuleResources.ErrorDetailMessage,
-                record.RuleId,
-                record.Error.Message,
-                record.Error.ScriptExtent.File,
-                record.Error.ScriptExtent.StartLineNumber,
-                record.Error.ScriptExtent.StartColumnNumber
-            ));
-            WriteError(errorRecord);
-        }
-
-        protected static ActionPreference GetPreferenceVariable(SessionState sessionState, string variableName)
-        {
-            return (ActionPreference)sessionState.PSVariable.GetValue(variableName);
+            _HadErrors = value;
         }
     }
 
-    internal abstract class SerializationOutputWriter<T> : PipelineWriter
+    /// <inheritdoc/>
+    public virtual bool HadFailures
     {
-        private readonly List<T> _Result;
-
-        protected SerializationOutputWriter(PipelineWriter inner, PSRuleOption option)
-            : base(inner, option)
+        get
         {
-            _Result = new List<T>();
+            return _HadFailures || (_Writer != null && _Writer.HadFailures);
         }
-
-        public override void WriteObject(object sendToPipeline, bool enumerateCollection)
+        set
         {
-            if (sendToPipeline is InvokeResult && Option.Output.As == ResultFormat.Summary)
-                return;
-
-            if (sendToPipeline is InvokeResult result)
-            {
-                Add(result.AsRecord());
-                return;
-            }
-            Add(sendToPipeline);
-        }
-
-        protected void Add(object o)
-        {
-            if (o is T[] collection)
-                _Result.AddRange(collection);
-            else if (o is T item)
-                _Result.Add(item);
-        }
-
-        public sealed override void End()
-        {
-            var results = _Result.ToArray();
-            base.WriteObject(Serialize(results), false);
-            ProcessError(results);
-        }
-
-        protected abstract string Serialize(T[] o);
-
-        private void ProcessError(T[] results)
-        {
-            for (var i = 0; i < results.Length; i++)
-            {
-                if (results[i] is RuleRecord record)
-                    WriteErrorInfo(record);
-            }
+            _HadFailures = value;
         }
     }
+
+    /// <inheritdoc/>
+    public virtual void Begin()
+    {
+        if (_Writer == null)
+            return;
+
+        _Writer.Begin();
+    }
+
+    /// <inheritdoc/>
+    public virtual void WriteObject(object sendToPipeline, bool enumerateCollection)
+    {
+        if (_Writer == null || sendToPipeline == null)
+            return;
+
+        _Writer.WriteObject(sendToPipeline, enumerateCollection);
+    }
+
+    /// <inheritdoc/>
+    public virtual void End(IPipelineResult result)
+    {
+        if (_Writer == null)
+            return;
+
+        _Writer.End(result);
+    }
+
+    /// <inheritdoc/>
+    public virtual void WriteVerbose(string message)
+    {
+        if (_Writer == null || string.IsNullOrEmpty(message))
+            return;
+
+        _Writer.WriteVerbose(message);
+    }
+
+    /// <inheritdoc/>
+    public virtual bool ShouldWriteVerbose()
+    {
+        return _Writer != null && _Writer.ShouldWriteVerbose();
+    }
+
+    /// <inheritdoc/>
+    public virtual void WriteWarning(string message)
+    {
+        if (_Writer == null || string.IsNullOrEmpty(message))
+            return;
+
+        _Writer.WriteWarning(message);
+    }
+
+    /// <inheritdoc/>
+    public virtual bool ShouldWriteWarning()
+    {
+        return _Writer != null && _Writer.ShouldWriteWarning();
+    }
+
+    /// <inheritdoc/>
+    public virtual void WriteError(ErrorRecord errorRecord)
+    {
+        if (_Writer == null || errorRecord == null)
+            return;
+
+        _Writer.WriteError(errorRecord);
+    }
+
+    /// <inheritdoc/>
+    public virtual bool ShouldWriteError()
+    {
+        return _Writer != null && _Writer.ShouldWriteError();
+    }
+
+    /// <inheritdoc/>
+    public virtual void WriteInformation(InformationRecord informationRecord)
+    {
+        if (_Writer == null || informationRecord == null)
+            return;
+
+        _Writer.WriteInformation(informationRecord);
+    }
+
+    /// <inheritdoc/>
+    public virtual void WriteHost(HostInformationMessage info)
+    {
+        if (_Writer == null)
+            return;
+
+        _Writer.WriteHost(info);
+    }
+
+    /// <inheritdoc/>
+    public virtual bool ShouldWriteInformation()
+    {
+        return _Writer != null && _Writer.ShouldWriteInformation();
+    }
+
+    /// <inheritdoc/>
+    public virtual void WriteDebug(string text, params object[] args)
+    {
+        if (_Writer == null || string.IsNullOrEmpty(text) || !ShouldWriteDebug())
+            return;
+
+        text = args == null || args.Length == 0 ? text : string.Format(Thread.CurrentThread.CurrentCulture, text, args);
+        _Writer.WriteDebug(text);
+    }
+
+    /// <inheritdoc/>
+    public virtual bool ShouldWriteDebug()
+    {
+        return _Writer != null && _Writer.ShouldWriteDebug();
+    }
+
+    /// <inheritdoc/>
+    public virtual void EnterScope(string scopeName)
+    {
+        if (_Writer == null)
+            return;
+
+        _Writer.EnterScope(scopeName);
+    }
+
+    /// <inheritdoc/>
+    public virtual void ExitScope()
+    {
+        if (_Writer == null)
+            return;
+
+        _Writer.ExitScope();
+    }
+
+    #region IDisposable
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_IsDisposed)
+        {
+            if (disposing && _Writer != null)
+                _Writer.Dispose();
+
+            _IsDisposed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion IDisposable
+
+    protected void WriteErrorInfo(RuleRecord record)
+    {
+        if (record == null || record.Error == null)
+            return;
+
+        var errorRecord = new ErrorRecord(
+            record.Error.Exception,
+            record.Error.ErrorId,
+            record.Error.Category,
+            record.TargetName
+        );
+        errorRecord.CategoryInfo.TargetType = record.TargetType;
+        errorRecord.ErrorDetails = new ErrorDetails(string.Format(
+            Thread.CurrentThread.CurrentCulture,
+            PSRuleResources.ErrorDetailMessage,
+            record.RuleId,
+            record.Error.Message,
+            record.Error.ScriptExtent.File,
+            record.Error.ScriptExtent.StartLineNumber,
+            record.Error.ScriptExtent.StartColumnNumber
+        ));
+        WriteError(errorRecord);
+    }
+
+    private bool ShouldProcess(string target, string action)
+    {
+        return _ShouldProcess == null || _ShouldProcess(target, action);
+    }
+
+    private bool CreatePath(string path)
+    {
+        var parentPath = Directory.GetParent(path);
+        if (!parentPath.Exists && ShouldProcess(target: parentPath.FullName, action: PSRuleResources.ShouldCreatePath))
+        {
+            Directory.CreateDirectory(path: parentPath.FullName);
+            return true;
+        }
+        return parentPath.Exists;
+    }
+
+    protected bool CreateFile(string path)
+    {
+        return CreatePath(path) && ShouldProcess(target: path, action: PSRuleResources.ShouldWriteFile);
+    }
+
+    /// <summary>
+    /// Get the value of a preference variable.
+    /// </summary>
+    protected static ActionPreference GetPreferenceVariable(SessionState sessionState, string variableName)
+    {
+        return (ActionPreference)sessionState.PSVariable.GetValue(variableName);
+    }
+
+    #region ILogger
+
+    public virtual bool IsEnabled(LogLevel logLevel)
+    {
+        switch (logLevel)
+        {
+            case LogLevel.Trace:
+            case LogLevel.Debug:
+                return ShouldWriteDebug();
+
+            case LogLevel.Information:
+                return ShouldWriteInformation();
+
+            case LogLevel.Warning:
+                return ShouldWriteWarning();
+
+            case LogLevel.Error:
+            case LogLevel.Critical:
+                return ShouldWriteError();
+        }
+        return false;
+    }
+
+    public virtual void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    {
+        if (logLevel == LogLevel.Error || logLevel == LogLevel.Critical)
+            HadErrors = true;
+
+        if (_Writer == null)
+            return;
+
+        _Writer.Log(logLevel, eventId, state, exception, formatter);
+    }
+
+    #endregion ILogger
 }
+
+#nullable restore

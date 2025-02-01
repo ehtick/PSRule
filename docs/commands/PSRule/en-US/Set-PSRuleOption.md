@@ -15,18 +15,24 @@ Sets options that configure PSRule execution.
 
 ```text
 Set-PSRuleOption [[-Path] <String>] [-Option <PSRuleOption>] [-PassThru] [-Force] [-AllowClobber]
- [-BindingIgnoreCase <Boolean>] [-BindingField <Hashtable>] [-BindingNameSeparator <String>]
- [-BindingPreferTargetInfo <Boolean>] [-TargetName <String[]>] [-TargetType <String[]>]
- [-BindingUseQualifiedName <Boolean>] [-Convention <String[]>] [-InconclusiveWarning <Boolean>]
- [-NotProcessedWarning <Boolean>] [-SuppressedRuleWarning <Boolean>] [-AliasReferenceWarning <Boolean>]
- [-InvariantCultureWarning <Boolean>] [-IncludeModule <String[]>] [-IncludePath <String[]>]
- [-Format <InputFormat>] [-InputIgnoreGitPath <Boolean>] [-InputIgnoreRepositoryCommon <Boolean>]
- [-ObjectPath <String>] [-InputPathIgnore <String[]>] [-InputTargetType <String[]>]
- [-LoggingLimitDebug <String[]>] [-LoggingLimitVerbose <String[]>] [-LoggingRuleFail <OutcomeLogStream>]
- [-LoggingRulePass <OutcomeLogStream>] [-OutputAs <ResultFormat>] [-OutputBanner <BannerFormat>]
- [-OutputCulture <String[]>] [-OutputEncoding <OutputEncoding>] [-OutputFooter <FooterFormat>]
- [-OutputFormat <OutputFormat>] [-OutputOutcome <RuleOutcome>] [-OutputPath <String>]
- [-OutputSarifProblemsOnly <Boolean>] [-OutputStyle <OutputStyle>] [-OutputJsonIndent <Int32>]
+ [-BaselineGroup <Hashtable>] [-BindingIgnoreCase <Boolean>] [-BindingField <Hashtable>]
+ [-BindingNameSeparator <String>] [-BindingPreferTargetInfo <Boolean>] [-TargetName <String[]>]
+ [-TargetType <String[]>] [-BindingUseQualifiedName <Boolean>] [-Convention <String[]>]
+ [-DuplicateResourceId <ExecutionActionPreference>] [-InitialSessionState <SessionState>]
+ [-SuppressionGroupExpired <ExecutionActionPreference>] [-ExecutionRuleExcluded <ExecutionActionPreference>]
+ [-ExecutionRuleSuppressed <ExecutionActionPreference>] [-ExecutionAliasReference <ExecutionActionPreference>]
+ [-ExecutionRuleInconclusive <ExecutionActionPreference>]
+ [-ExecutionInvariantCulture <ExecutionActionPreference>]
+ [-ExecutionUnprocessedObject <ExecutionActionPreference>] [-IncludeModule <String[]>]
+ [-IncludePath <String[]>] [-Format <InputFormat>] [-InputIgnoreGitPath <Boolean>]
+ [-InputIgnoreObjectSource <Boolean>] [-InputIgnoreRepositoryCommon <Boolean>]
+ [-InputIgnoreUnchangedPath <Boolean>] [-ObjectPath <String>] [-InputPathIgnore <String[]>]
+ [-InputTargetType <String[]>] [-LoggingLimitDebug <String[]>] [-LoggingLimitVerbose <String[]>]
+ [-LoggingRuleFail <OutcomeLogStream>] [-LoggingRulePass <OutcomeLogStream>] [-OutputAs <ResultFormat>]
+ [-OutputBanner <BannerFormat>] [-OutputCulture <String[]>] [-OutputEncoding <OutputEncoding>]
+ [-OutputFooter <FooterFormat>] [-OutputFormat <OutputFormat>] [-OutputJobSummaryPath <String>]
+ [-OutputJsonIndent <Int32>] [-OutputOutcome <RuleOutcome>] [-OutputPath <String>]
+ [-OutputSarifProblemsOnly <Boolean>] [-OutputStyle <OutputStyle>] [-RepositoryBaseRef <String>]
  [-RepositoryUrl <String>] [-RuleIncludeLocal <Boolean>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
@@ -137,6 +143,24 @@ Overwrite YAML files that contain comments.
 
 ```yaml
 Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -BaselineGroup
+
+Sets the option `Baseline.Group`.
+The option `Baseline.Group` allows a named group of baselines to be defined and later referenced.
+See about_PSRule_Options for more information.
+
+```yaml
+Type: Hashtable
 Parameter Sets: (All)
 Aliases:
 
@@ -291,56 +315,74 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -InconclusiveWarning
+### -ExecutionAliasReference
 
-Sets the option `Execution.InconclusiveWarning`.
-The `Execution.InconclusiveWarning` option determines if a warning is generated when the outcome of a rule is inconclusive.
+Sets the `Execution.AliasReference` option.
+Determines how to handle when an alias to a resource is used.
 See about_PSRule_Options for more information.
 
 ```yaml
-Type: Boolean
+Type: ExecutionActionPreference
 Parameter Sets: (All)
-Aliases: ExecutionInconclusiveWarning
+Aliases:
 
 Required: False
 Position: Named
-Default value: True
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -NotProcessedWarning
+### -ExecutionInvariantCulture
 
-Sets the `Execution.NotProcessedWarning` option.
-The `Execution.NotProcessedWarning` option determines if a warning is generated when an object is not processed by any rule.
+Sets the `Execution.InvariantCulture` option.
+Determines how to report when an invariant culture is used.
 See about_PSRule_Options for more information.
 
 ```yaml
-Type: Boolean
+Type: ExecutionActionPreference
 Parameter Sets: (All)
-Aliases: ExecutionNotProcessedWarning
+Aliases:
 
 Required: False
 Position: Named
-Default value: True
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SuppressedRuleWarning
+### -ExecutionRuleInconclusive
 
-Sets the `Execution.SuppressedRuleWarning` option.
-The `Execution.SuppressedRuleWarning` option determines if a warning is generated when a rule is suppressed.
+Sets the `Execution.RuleInconclusive` option.
+Determines how to handle rules that generate inconclusive results.
 See about_PSRule_Options for more information.
 
 ```yaml
-Type: Boolean
+Type: ExecutionActionPreference
 Parameter Sets: (All)
-Aliases: ExecutionSuppressedRuleWarning
+Aliases:
 
 Required: False
 Position: Named
-Default value: True
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ExecutionUnprocessedObject
+
+Sets the `Execution.UnprocessedObject` option.
+Determines how to report objects that are not processed by any rule.
+See about_PSRule_Options for more information.
+
+```yaml
+Type: ExecutionActionPreference
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -431,6 +473,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -InputIgnoreUnchangedPath
+
+Sets the option `Input.IgnoreUnchangedPath`.
+The `Input.IgnoreUnchangedPath` option determine if unchanged files are ignored.
+
+```yaml
+Type: Boolean
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -ObjectPath
 
 Sets the `Input.ObjectPath` option to use an object path to use instead of the pipeline object.
@@ -472,6 +531,23 @@ Sets the `Input.TargetType` option to only process objects with the specified Ta
 
 ```yaml
 Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -InputIgnoreObjectSource
+
+Sets the option `Input.IgnoreObjectSource`.
+The `Input.IgnoreObjectSource` option determines if objects will be skipped if the source path has been ignored.
+
+```yaml
+Type: Boolean
 Parameter Sets: (All)
 Aliases:
 
@@ -656,6 +732,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -OutputJobSummaryPath
+
+Set the option `Output.JobSummaryPath`.
+The `Output.JobSummaryPath` option configures the path to a job summary output file.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -OutputJsonIndent
 
 Sets the option `Output.JsonIndent`.
@@ -780,6 +873,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -RepositoryBaseRef
+
+Sets the option `Repository.BaseRef`.
+The `Repository.BaseRef` option sets the repository base ref used for comparisons of changed files.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -RepositoryUrl
 
 Sets the option `Repository.Url`.
@@ -815,15 +925,15 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -AliasReferenceWarning
+### -DuplicateResourceId
 
-Sets the option `Execution.AliasReferenceWarning`.
-The `Execution.AliasReferenceWarning` option determines if a warning is logged when alises are referenced.
+Sets the option `Execution.DuplicateResourceId`.
+The `Execution.DuplicateResourceId` option determines how to handle duplicate resources identifiers during execution.
 
 ```yaml
-Type: Boolean
+Type: ExecutionActionPreference
 Parameter Sets: (All)
-Aliases: ExecutionAliasReferenceWarning
+Aliases: ExecutionDuplicateResourceId
 
 Required: False
 Position: Named
@@ -832,15 +942,66 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -InvariantCultureWarning
+### -InitialSessionState
 
-Sets the option `Execution.InvariantCultureWarning`.
-The `Execution.InvariantCultureWarning` option set if a warning is logged when invarient culture is detected.
+Sets the option `Execution.InitialSessionState`.
+The `Execution.InitialSessionState` option determines how the initial session state for executing PowerShell code is created.
 
 ```yaml
-Type: Boolean
+Type: SessionState
 Parameter Sets: (All)
-Aliases: ExecutionInvariantCultureWarning
+Aliases: ExecutionInitialSessionState
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ExecutionRuleExcluded
+
+Sets the option `Execution.RuleExcluded`.
+The `Execution.RuleExcluded` option determines how to handle excluded rules.
+
+```yaml
+Type: ExecutionActionPreference
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ExecutionRuleSuppressed
+
+Sets the option `Execution.RuleSuppressed`.
+The `Execution.RuleSuppressed` option determines how to handle suppressed rules.
+
+```yaml
+Type: ExecutionActionPreference
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SuppressionGroupExpired
+
+Sets the option `Execution.SuppressionGroupExpired`.
+The `Execution.SuppressionGroupExpired` option determines how to handle expired suppression groups.
+
+```yaml
+Type: ExecutionActionPreference
+Parameter Sets: (All)
+Aliases: ExecutionSuppressionGroupExpired
 
 Required: False
 Position: Named
